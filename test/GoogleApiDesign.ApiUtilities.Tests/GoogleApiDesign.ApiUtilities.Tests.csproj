@@ -14,7 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\GoogleApiDesign.ApiUtilities\GoogleApiDesign.ApiUtilities.csproj" />
+      <ProjectReference Include="..\..\src\GoogleApiDesign.ApiUtilities\GoogleApiDesign.ApiUtilities.csproj" />
     </ItemGroup>
 
 </Project>

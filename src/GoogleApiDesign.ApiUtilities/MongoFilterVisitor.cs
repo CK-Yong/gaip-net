@@ -8,14 +8,9 @@ namespace GoogleApiDesign.ApiUtilities
         private FilterDefinitionBuilder<object> _filterBuilder = Builders<object>.Filter;
         private FilterDefinition<object> _filter = FilterDefinition<object>.Empty;
 
-        public MongoFilterVisitor()
-        {
-            
-        }
-        
         public override object VisitRestriction(FilterParser.RestrictionContext context)
         {
-            var comparable = (FieldDefinition<object, object>) VisitComparable(context.comparable());
+            var comparable = (VisitComparable(context.comparable())).ToString();
             var comparator = context.comparator().GetText();
             var arg = context.arg();
 
