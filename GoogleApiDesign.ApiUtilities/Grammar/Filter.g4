@@ -18,7 +18,7 @@ Example: `a b AND c AND d`
 The expression `(a b) AND c AND d` is equivalent to the example.
 **/
 expression
-    : sequence (WS AND WS sequence)*
+    : sequence (AND sequence)*
     ;
 
 /**    
@@ -38,7 +38,7 @@ The expression `New York (Giants OR Yankees)` is equivalent to the
 example.
 **/
 sequence
-    : factor (WS factor)*
+    : factor (factor)*
     ;
 
 /**
@@ -49,7 +49,7 @@ Note, the OR is case-sensitive.
 Example: `a < 10 OR a >= 100`
 **/
 factor
-    : term (WS OR WS term)*
+    : term (OR term)*
     ;
 
 /**    
@@ -67,7 +67,7 @@ Examples:
 * negation        : `-30`
 **/
 term
-    : (NOT WS | MINUS)? simple
+    : (NOT | MINUS)? simple
     ;
 
 /**
@@ -110,8 +110,8 @@ restriction
 Comparable may either be a member or function.
 **/
 comparable
-    : member
-    | function
+    : function 
+    | member
     ;
 
 /**    
@@ -154,6 +154,7 @@ comparator
     | EQUALS           // =
     | HAS              // :
     ;
+    
 /**
 Composite is a parenthesized expression, commonly used to group
 terms or clarify operator precedence.
@@ -179,6 +180,7 @@ indicate a prefix or suffix-based search within a restriction.
 value
     : TEXT
     | STRING
+    | ASTERISK // Addition to support wildcard searches, see 'Has Operator'
     ;
 
 /**
@@ -212,8 +214,10 @@ keyword
     | OR
     ;
 
-// Lexer Rules
-WS : (' ' | '\t');
+/**
+Lexer Rules
+**/
+WS : (' ' | '\t') -> skip;
 
 AND: 'AND';
 OR: 'OR';
@@ -233,5 +237,8 @@ HAS: ':';
 LPAREN: '(';
 RPAREN: ')';
 ASTERISK: '*';
+COMMA: ',';
 
-STRING: '"' ASTERISK? ('a'..'z' | 'A..Z' | WS |  )* ASTERISK? '"';
+QUOTE: ('\'' | '"');
+STRING: QUOTE ASTERISK? ~('\r' | '\n' )* ASTERISK? QUOTE;
+TEXT: ('a'..'z'| 'A'..'Z' | '0'..'9'| '_' )+;
