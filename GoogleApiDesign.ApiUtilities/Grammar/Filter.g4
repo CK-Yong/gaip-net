@@ -178,9 +178,12 @@ wildcard `*` character at the beginning or end of the string to
 indicate a prefix or suffix-based search within a restriction.
 **/
 value
-    : TEXT
+    // Higher priority custom values for easier type conversion.
+    : INTEGER
+    | ASTERISK 
+    // Standard values.
     | STRING
-    | ASTERISK // Addition to support wildcard searches, see 'Has Operator'
+    | TEXT
     ;
 
 /**
@@ -217,6 +220,8 @@ keyword
 /**
 Lexer Rules
 **/
+fragment DIGIT: '0'..'9';
+
 WS : (' ' | '\t') -> skip;
 
 AND: 'AND';
@@ -241,4 +246,7 @@ COMMA: ',';
 
 QUOTE: ('\'' | '"');
 STRING: QUOTE ASTERISK? ~('\r' | '\n' )* ASTERISK? QUOTE;
-TEXT: ('a'..'z'| 'A'..'Z' | '0'..'9'| '_' )+;
+
+INTEGER: DIGIT+;
+
+TEXT: ('a'..'z'| 'A'..'Z' | DIGIT | '_' )+;
