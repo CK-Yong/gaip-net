@@ -68,7 +68,25 @@ namespace GoogleApiDesign.ApiUtilities.Tests
             value.Should().BeEquivalentTo(BsonDocument.Parse(expected));
         }
 
-        // Strings
+        [TestCase("-foo=bar", "{ foo : { $ne : \"bar\" }}")]
+        [TestCase("NOT foo=bar", "{ foo : { $ne : \"bar\" }}")]
+        [TestCase("NOT foo>bar", "{ foo : { $not : { $gt: \"bar\" }}}")]
+        [TestCase("-foo<bar", "{ foo : { $not : { $lt: \"bar\" }}}")]
+        [TestCase("NOT foo>=bar", "{ foo : { $not : { $gte: \"bar\" }}}")]
+        public void ShouldParseNegationOperations(string text, string expectedQuery)
+        {
+            // Arrange
+            var parser = Setup(text);
+            var visitor = new MongoFilterVisitor();
+
+            // Act
+            visitor.Visit(parser);
+
+            // Assert
+            var value = ConvertToString(visitor.GetFilter());
+            value.Should().BeEquivalentTo(BsonDocument.Parse(expectedQuery));
+        }
+
 
         private BsonDocument ConvertToString<T>(FilterDefinition<T> filterDefinition)
         {

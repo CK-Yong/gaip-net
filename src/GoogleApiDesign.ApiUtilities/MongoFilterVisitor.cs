@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Globalization;
-using Antlr4.Runtime.Misc;
 using MongoDB.Driver;
 
 namespace GoogleApiDesign.ApiUtilities
@@ -9,6 +8,17 @@ namespace GoogleApiDesign.ApiUtilities
     {
         private FilterDefinitionBuilder<object> _filterBuilder = Builders<object>.Filter;
         private FilterDefinition<object> _filter = FilterDefinition<object>.Empty;
+        
+        public override object VisitTerm(FilterParser.TermContext context)
+        {
+            if (context.MINUS() != null || context.NOT() != null)
+            {
+                var simple = VisitSimple(context.simple());
+                return _filter = _filterBuilder.Not(simple as FilterDefinition<object>);
+            }
+
+            return base.VisitTerm(context);
+        }
 
         public override object VisitRestriction(FilterParser.RestrictionContext context)
         {
@@ -16,7 +26,7 @@ namespace GoogleApiDesign.ApiUtilities
             var comparator = context.comparator().GetText();
             var arg = context.arg();
 
-            _filter &= comparator switch
+            return _filter &= comparator switch
             {
                 "=" => _filterBuilder.Eq(comparable, VisitArg(arg)),
                 "<" => _filterBuilder.Lt(comparable, VisitArg(arg)),
@@ -26,8 +36,6 @@ namespace GoogleApiDesign.ApiUtilities
                 ":" => _filterBuilder.ElemMatch<object>(comparable, $"{{$eq: {VisitArg(arg)}}}"),
                 _ => throw new NotSupportedException()
             };
-            
-            return base.VisitRestriction(context);
         }
 
         public override object VisitValue(FilterParser.ValueContext context)
