@@ -40,6 +40,7 @@ namespace GoogleApiDesign.ApiUtilities.Tests
         }
 
         [TestCase("\"Some String\"", "{ foo : \"Some String\" }")]
+        [TestCase("\'Some String'", "{ foo : \"Some String\" }")]
         // Integral numbers
         [TestCase("123", "{ foo : 123 }")]
         [TestCase("1000000000000", "{ foo : NumberLong(1000000000000) }")]
@@ -126,6 +127,22 @@ namespace GoogleApiDesign.ApiUtilities.Tests
         [TestCase("foo.bar>42", "{ \"foo.bar\": { $gt: 42 }}")]
         [TestCase("foo.bar.baz=\"foo\"", "{ \"foo.bar.baz\": \"foo\" }")]
         public void ShouldHandleTraversalOperations(string text, string expectedQuery)
+        {
+            // Arrange
+            var parser = Setup(text);
+            var visitor = new MongoFilterVisitor();
+
+            // Act
+            visitor.Visit(parser);
+
+            // Assert
+            var value = ConvertToString(visitor.GetFilter());
+            value.Should().BeEquivalentTo(BsonDocument.Parse(expectedQuery));
+        }
+
+        [TestCase("foo=\"bar*\"", "{ foo : { $regex: \"^bar\" } }")]
+        [TestCase("foo=\"*bar\"", "{ foo : { $regex: \"bar$\" } }")]
+        public void ShouldHandleWildCardSearches(string text, string expectedQuery)
         {
             // Arrange
             var parser = Setup(text);

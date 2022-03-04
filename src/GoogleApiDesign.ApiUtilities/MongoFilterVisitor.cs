@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace GoogleApiDesign.ApiUtilities
@@ -19,7 +20,7 @@ namespace GoogleApiDesign.ApiUtilities
                 var list = context.sequence()
                     .Select(sequence => VisitSequence(sequence) as FilterDefinition<object>)
                     .ToList();
-                
+
                 _filter = _filterBuilder.And(list);
                 return _filter;
             }
@@ -61,7 +62,7 @@ namespace GoogleApiDesign.ApiUtilities
 
             _filter = comparator switch
             {
-                "=" => _filterBuilder.Eq(comparable, VisitArg(arg)),
+                "=" => EqualityOrSearch(comparable, arg),
                 "<" => _filterBuilder.Lt(comparable, VisitArg(arg)),
                 "<=" => _filterBuilder.Lte(comparable, VisitArg(arg)),
                 ">=" => _filterBuilder.Gte(comparable, VisitArg(arg)),
@@ -72,6 +73,29 @@ namespace GoogleApiDesign.ApiUtilities
             };
 
             return _filter;
+        }
+
+        private FilterDefinition<object> EqualityOrSearch(string? comparable, FilterParser.ArgContext arg)
+        {
+            var argValue = arg.comparable().member().value().STRING();
+
+            if (argValue != null)
+            {
+                var strValue = argValue.GetText().Trim('\"', '\'');
+
+                if (strValue.EndsWith("*"))
+                {
+                    return _filterBuilder.Regex(comparable,
+                        BsonRegularExpression.Create($"^{strValue.Substring(0, strValue.Length - 1)}"));
+                }
+
+                if (strValue.StartsWith('*'))
+                {
+                    return _filterBuilder.Regex(comparable,
+                        BsonRegularExpression.Create($"{strValue.Substring(1, strValue.Length - 1)}$"));
+                }
+            }
+            return _filterBuilder.Eq(comparable, VisitArg(arg));
         }
 
         public override object VisitMember(FilterParser.MemberContext context)
@@ -124,7 +148,7 @@ namespace GoogleApiDesign.ApiUtilities
 
             if (context.STRING() != null)
             {
-                return context.STRING().GetText().Trim('\"');
+                return context.STRING().GetText().Trim('\"', '\'');
             }
 
             if (context.TEXT() != null)
