@@ -10,7 +10,7 @@ namespace GoogleApiDesign.ApiUtilities.Tests
 {
     public class MongoFilterVisitorTests
     {
-        public FilterParser.FilterContext Setup(string text)
+        private FilterParser.FilterContext Setup(string text)
         {
             var inputStream = new AntlrInputStream(text);
             var lexer = new FilterLexer(inputStream);
@@ -20,6 +20,7 @@ namespace GoogleApiDesign.ApiUtilities.Tests
 
         [TestCase("=", "{ foo : 123 }")]
         [TestCase("<", "{ foo : { $lt : 123 } }")]
+        [TestCase("<=", "{ foo : { $lte : 123 } }")]
         [TestCase(">=", "{ foo : { $gte : 123 } }")]
         [TestCase(">", "{ foo : { $gt : 123 } }")]
         [TestCase("!=", "{ foo : { $ne : 123 } }")]
@@ -87,7 +88,40 @@ namespace GoogleApiDesign.ApiUtilities.Tests
             value.Should().BeEquivalentTo(BsonDocument.Parse(expectedQuery));
         }
 
+        [TestCase("foo=bar AND foo!=baz", "{ $and : [ { foo : \"bar\" }, { foo : { $ne: \"baz\" } } ] }")]
+        [TestCase("foo=bar AND temp<=100", "{ foo: \"bar\", temp: { $lte: 100 } } ")]
+        [TestCase("foo=bar AND temp<=100 AND isDeleted=false", "{ foo: \"bar\", temp: { $lte: 100 }, isDeleted: false } ")]
+        public void ShouldHandleAndOperators(string text, string expectedQuery)
+        {
+            // Arrange
+            var parser = Setup(text);
+            var visitor = new MongoFilterVisitor();
 
+            // Act
+            visitor.Visit(parser);
+
+            // Assert
+            var value = ConvertToString(visitor.GetFilter());
+            value.Should().BeEquivalentTo(BsonDocument.Parse(expectedQuery));
+        }
+        
+        [TestCase("foo=bar OR foo!=baz", "{ $or : [ { foo : \"bar\" }, { foo : { $ne: \"baz\" } } ] }")]
+        [TestCase("foo=bar OR temp<=100", "{ $or: [{ foo: \"bar\" }, { temp: { $lte: 100 } } ] }")]
+        [TestCase("foo=bar OR foo=\"baz\" OR isDeleted=false", "{ $or : [ { foo : \"bar\" }, { foo : \"baz\" }, { isDeleted: false } ] }")]
+        public void ShouldHandleOrOperators(string text, string expectedQuery)
+        {
+            // Arrange
+            var parser = Setup(text);
+            var visitor = new MongoFilterVisitor();
+
+            // Act
+            visitor.Visit(parser);
+
+            // Assert
+            var value = ConvertToString(visitor.GetFilter());
+            value.Should().BeEquivalentTo(BsonDocument.Parse(expectedQuery));
+        }
+        
         private BsonDocument ConvertToString<T>(FilterDefinition<T> filterDefinition)
         {
             var serializer = BsonSerializer.SerializerRegistry.GetSerializer<T>();

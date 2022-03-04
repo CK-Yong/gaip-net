@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using MongoDB.Driver;
 
@@ -14,10 +15,42 @@ namespace GoogleApiDesign.ApiUtilities
             if (context.MINUS() != null || context.NOT() != null)
             {
                 var simple = VisitSimple(context.simple());
-                return _filter = _filterBuilder.Not(simple as FilterDefinition<object>);
+                _filter = _filterBuilder.Not(simple as FilterDefinition<object>);
+                return _filter;
             }
 
             return base.VisitTerm(context);
+        }
+
+        public override object VisitFactor(FilterParser.FactorContext context)
+        {
+            if (context.OR().Length > 0)
+            {
+                var list = new List<FilterDefinition<object>>();
+                foreach (var term in context.term())
+                {
+                    list.Add(VisitTerm(term) as FilterDefinition<object>);
+                }
+                _filter = _filterBuilder.Or(list);
+                return _filter;
+            }
+
+            return base.VisitFactor(context);
+        }
+
+        public override object VisitExpression(FilterParser.ExpressionContext context)
+        {
+            if (context.AND().Length > 0)
+            {
+                var list = new List<FilterDefinition<object>>();
+                foreach (var sequence in context.sequence())
+                {
+                    list.Add(VisitSequence(sequence) as FilterDefinition<object>);
+                }
+                _filter = _filterBuilder.And(list);
+                return _filter;
+            }
+            return base.VisitExpression(context);
         }
 
         public override object VisitRestriction(FilterParser.RestrictionContext context)
@@ -26,16 +59,19 @@ namespace GoogleApiDesign.ApiUtilities
             var comparator = context.comparator().GetText();
             var arg = context.arg();
 
-            return _filter &= comparator switch
+            _filter = comparator switch
             {
                 "=" => _filterBuilder.Eq(comparable, VisitArg(arg)),
                 "<" => _filterBuilder.Lt(comparable, VisitArg(arg)),
+                "<=" => _filterBuilder.Lte(comparable, VisitArg(arg)),
                 ">=" => _filterBuilder.Gte(comparable, VisitArg(arg)),
                 ">" => _filterBuilder.Gt(comparable, VisitArg(arg)),
                 "!=" => _filterBuilder.Ne(comparable, VisitArg(arg)),
                 ":" => _filterBuilder.ElemMatch<object>(comparable, $"{{$eq: {VisitArg(arg)}}}"),
                 _ => throw new NotSupportedException()
             };
+            
+            return _filter;
         }
 
         public override object VisitValue(FilterParser.ValueContext context)
