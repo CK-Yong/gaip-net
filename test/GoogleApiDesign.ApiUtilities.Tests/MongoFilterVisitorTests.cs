@@ -7,7 +7,7 @@ using NUnit.Framework;
 
 namespace GoogleApiDesign.ApiUtilities.Tests
 {
-    public class Tests
+    public class MongoFilterVisitorTests
     {
         public FilterParser.FilterContext Setup(string text)
         {
