@@ -16,11 +16,10 @@ namespace GoogleApiDesign.ApiUtilities
         {
             if (context.AND().Length > 0)
             {
-                var list = new List<FilterDefinition<object>>();
-                foreach (var sequence in context.sequence())
-                {
-                    list.Add(VisitSequence(sequence) as FilterDefinition<object>);
-                }
+                var list = context.sequence()
+                    .Select(sequence => VisitSequence(sequence) as FilterDefinition<object>)
+                    .ToList();
+                
                 _filter = _filterBuilder.And(list);
                 return _filter;
             }
@@ -31,11 +30,10 @@ namespace GoogleApiDesign.ApiUtilities
         {
             if (context.OR().Length > 0)
             {
-                var list = new List<FilterDefinition<object>>();
-                foreach (var term in context.term())
-                {
-                    list.Add(VisitTerm(term) as FilterDefinition<object>);
-                }
+                var list = context.term()
+                    .Select(term => VisitTerm(term) as FilterDefinition<object>)
+                    .ToList();
+
                 _filter = _filterBuilder.Or(list);
                 return _filter;
             }
