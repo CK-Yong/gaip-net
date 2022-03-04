@@ -1,4 +1,5 @@
 ﻿using System;
+using Antlr4.Runtime.Misc;
 using MongoDB.Driver;
 
 namespace GoogleApiDesign.ApiUtilities
@@ -21,6 +22,7 @@ namespace GoogleApiDesign.ApiUtilities
                 ">=" => _filterBuilder.Gte(comparable, VisitArg(arg)),
                 ">" => _filterBuilder.Gt(comparable, VisitArg(arg)),
                 "!=" => _filterBuilder.Ne(comparable, VisitArg(arg)),
+                ":" => _filterBuilder.ElemMatch<object>(comparable, $"{{$eq: {VisitArg(arg)}}}"),
                 _ => throw new NotSupportedException()
             };
             
