@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using Antlr4.Runtime.Misc;
 using MongoDB.Driver;
 
@@ -31,16 +32,6 @@ namespace GoogleApiDesign.ApiUtilities
 
         public override object VisitValue(FilterParser.ValueContext context)
         {
-            if (context.STRING() != null)
-            {
-                return context.STRING().GetText();
-            }
-
-            if (context.TEXT() != null)
-            {
-                return context.TEXT().GetText();
-            }
-
             if (context.INTEGER() != null)
             {
                 if (int.TryParse(context.INTEGER().GetText(), out var result))
@@ -51,9 +42,40 @@ namespace GoogleApiDesign.ApiUtilities
                 return long.Parse(context.INTEGER().GetText());
             }
 
+            if (context.BOOLEAN() != null)
+            {
+                return bool.Parse(context.BOOLEAN().GetText());
+            }
+
+            if (context.FLOAT() != null)
+            {
+                return double.Parse(context.FLOAT().GetText(), CultureInfo.InvariantCulture);
+            }
+
+            if (context.DURATION() != null)
+            {
+                var value = context.DURATION().GetText().TrimEnd('s');
+                return double.Parse(value, CultureInfo.InvariantCulture) * 1000;
+            }
+            
             if (context.ASTERISK() != null)
             {
                 return context.ASTERISK().GetText();
+            }
+
+            if (context.DATETIME() != null)
+            {
+                return DateTimeOffset.Parse(context.DATETIME().GetText(), CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal).UtcDateTime;
+            }
+            
+            if (context.STRING() != null)
+            {
+                return context.STRING().GetText().Trim('\"');
+            }
+            
+            if (context.TEXT() != null)
+            {
+                return context.TEXT().GetText();
             }
             
             return base.VisitValue(context);

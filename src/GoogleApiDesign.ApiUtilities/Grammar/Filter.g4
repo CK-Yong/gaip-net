@@ -180,7 +180,11 @@ indicate a prefix or suffix-based search within a restriction.
 value
     // Higher priority custom values for easier type conversion.
     : INTEGER
+    | FLOAT
+    | BOOLEAN
     | ASTERISK 
+    | DURATION
+    | DATETIME
     // Standard values.
     | STRING
     | TEXT
@@ -220,8 +224,6 @@ keyword
 /**
 Lexer Rules
 **/
-fragment DIGIT: '0'..'9';
-
 WS : (' ' | '\t') -> skip;
 
 AND: 'AND';
@@ -244,9 +246,18 @@ RPAREN: ')';
 ASTERISK: '*';
 COMMA: ',';
 
-QUOTE: ('\'' | '"');
-STRING: QUOTE ASTERISK? ~('\r' | '\n' )* ASTERISK? QUOTE;
+fragment DIGIT: '0'..'9';
 
 INTEGER: DIGIT+;
+FLOAT: DIGIT+ ('.' DIGIT+)?;
+BOOLEAN: ('true' | 'false');
+DURATION: DIGIT+ ('.' DIGIT+)? 's';
 
+fragment T: ('T'|'t');
+fragment Z: ('Z'|'z');
+fragment PLUSMINUS: ('+'|'-');
+DATETIME: QUOTE? DIGIT DIGIT DIGIT DIGIT '-' DIGIT DIGIT '-' DIGIT DIGIT T DIGIT DIGIT ':' DIGIT DIGIT ':' DIGIT DIGIT ('.' DIGIT+)? (Z | PLUSMINUS DIGIT DIGIT ':' DIGIT DIGIT)? QUOTE?;
+
+QUOTE: ('\'' | '"');
+STRING: QUOTE ASTERISK? ~('\r' | '\n' )* ASTERISK? QUOTE;
 TEXT: ('a'..'z'| 'A'..'Z' | DIGIT | '_' )+;
