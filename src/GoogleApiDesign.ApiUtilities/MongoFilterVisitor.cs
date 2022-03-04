@@ -1,25 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using MongoDB.Driver;
 
 namespace GoogleApiDesign.ApiUtilities
 {
+    //todo: make this more generic by having a database adapter so we can swap out filter builders (e.g. towards SQL)
     public class MongoFilterVisitor : FilterBaseVisitor<object>
     {
         private FilterDefinitionBuilder<object> _filterBuilder = Builders<object>.Filter;
         private FilterDefinition<object> _filter = FilterDefinition<object>.Empty;
-        
-        public override object VisitTerm(FilterParser.TermContext context)
+
+        public override object VisitExpression(FilterParser.ExpressionContext context)
         {
-            if (context.MINUS() != null || context.NOT() != null)
+            if (context.AND().Length > 0)
             {
-                var simple = VisitSimple(context.simple());
-                _filter = _filterBuilder.Not(simple as FilterDefinition<object>);
+                var list = new List<FilterDefinition<object>>();
+                foreach (var sequence in context.sequence())
+                {
+                    list.Add(VisitSequence(sequence) as FilterDefinition<object>);
+                }
+                _filter = _filterBuilder.And(list);
                 return _filter;
             }
-
-            return base.VisitTerm(context);
+            return base.VisitExpression(context);
         }
 
         public override object VisitFactor(FilterParser.FactorContext context)
@@ -38,19 +43,16 @@ namespace GoogleApiDesign.ApiUtilities
             return base.VisitFactor(context);
         }
 
-        public override object VisitExpression(FilterParser.ExpressionContext context)
+        public override object VisitTerm(FilterParser.TermContext context)
         {
-            if (context.AND().Length > 0)
+            if (context.MINUS() != null || context.NOT() != null)
             {
-                var list = new List<FilterDefinition<object>>();
-                foreach (var sequence in context.sequence())
-                {
-                    list.Add(VisitSequence(sequence) as FilterDefinition<object>);
-                }
-                _filter = _filterBuilder.And(list);
+                var simple = VisitSimple(context.simple());
+                _filter = _filterBuilder.Not(simple as FilterDefinition<object>);
                 return _filter;
             }
-            return base.VisitExpression(context);
+
+            return base.VisitTerm(context);
         }
 
         public override object VisitRestriction(FilterParser.RestrictionContext context)
@@ -70,8 +72,18 @@ namespace GoogleApiDesign.ApiUtilities
                 ":" => _filterBuilder.ElemMatch<object>(comparable, $"{{$eq: {VisitArg(arg)}}}"),
                 _ => throw new NotSupportedException()
             };
-            
+
             return _filter;
+        }
+
+        public override object VisitMember(FilterParser.MemberContext context)
+        {
+            if (context.field().Length > 0)
+            {
+                return context.GetText();
+            }
+
+            return base.VisitMember(context);
         }
 
         public override object VisitValue(FilterParser.ValueContext context)
@@ -101,7 +113,7 @@ namespace GoogleApiDesign.ApiUtilities
                 var value = context.DURATION().GetText().TrimEnd('s');
                 return double.Parse(value, CultureInfo.InvariantCulture) * 1000;
             }
-            
+
             if (context.ASTERISK() != null)
             {
                 return context.ASTERISK().GetText();
@@ -111,17 +123,17 @@ namespace GoogleApiDesign.ApiUtilities
             {
                 return DateTimeOffset.Parse(context.DATETIME().GetText(), CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal).UtcDateTime;
             }
-            
+
             if (context.STRING() != null)
             {
                 return context.STRING().GetText().Trim('\"');
             }
-            
+
             if (context.TEXT() != null)
             {
                 return context.TEXT().GetText();
             }
-            
+
             return base.VisitValue(context);
         }
 
@@ -130,6 +142,4 @@ namespace GoogleApiDesign.ApiUtilities
             return _filter;
         }
     }
-    
-    //todo: make this more generic by having a database adapter so we can swap out filter builders (e.g. towards SQL)
 }

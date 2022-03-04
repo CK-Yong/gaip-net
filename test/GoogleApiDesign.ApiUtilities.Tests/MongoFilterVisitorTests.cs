@@ -24,7 +24,7 @@ namespace GoogleApiDesign.ApiUtilities.Tests
         [TestCase(">=", "{ foo : { $gte : 123 } }")]
         [TestCase(">", "{ foo : { $gt : 123 } }")]
         [TestCase("!=", "{ foo : { $ne : 123 } }")]
-        [TestCase(":", "{ foo : { $elemMatch : { $eq: 123 } } }")] 
+        [TestCase(":", "{ foo : { $elemMatch : { $eq: 123 } } }")]
         public void ShouldParseComparators(string op, string expected)
         {
             // Arrange
@@ -104,7 +104,7 @@ namespace GoogleApiDesign.ApiUtilities.Tests
             var value = ConvertToString(visitor.GetFilter());
             value.Should().BeEquivalentTo(BsonDocument.Parse(expectedQuery));
         }
-        
+
         [TestCase("foo=bar OR foo!=baz", "{ $or : [ { foo : \"bar\" }, { foo : { $ne: \"baz\" } } ] }")]
         [TestCase("foo=bar OR temp<=100", "{ $or: [{ foo: \"bar\" }, { temp: { $lte: 100 } } ] }")]
         [TestCase("foo=bar OR foo=\"baz\" OR isDeleted=false", "{ $or : [ { foo : \"bar\" }, { foo : \"baz\" }, { isDeleted: false } ] }")]
@@ -121,7 +121,24 @@ namespace GoogleApiDesign.ApiUtilities.Tests
             var value = ConvertToString(visitor.GetFilter());
             value.Should().BeEquivalentTo(BsonDocument.Parse(expectedQuery));
         }
-        
+
+        [TestCase("foo.bar=true", "{ \"foo.bar\": true }")]
+        [TestCase("foo.bar>42", "{ \"foo.bar\": { $gt: 42 }}")]
+        [TestCase("foo.bar.baz=\"foo\"", "{ \"foo.bar.baz\": \"foo\" }")]
+        public void ShouldHandleTraversalOperations(string text, string expectedQuery)
+        {
+            // Arrange
+            var parser = Setup(text);
+            var visitor = new MongoFilterVisitor();
+
+            // Act
+            visitor.Visit(parser);
+
+            // Assert
+            var value = ConvertToString(visitor.GetFilter());
+            value.Should().BeEquivalentTo(BsonDocument.Parse(expectedQuery));
+        }
+
         private BsonDocument ConvertToString<T>(FilterDefinition<T> filterDefinition)
         {
             var serializer = BsonSerializer.SerializerRegistry.GetSerializer<T>();
