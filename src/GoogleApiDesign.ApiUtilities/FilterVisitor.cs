@@ -50,17 +50,37 @@ namespace GoogleApiDesign.ApiUtilities
         {
             
         }
-        
-        
+
+
+        public IFilterAdapter And(List<object> list)
+        {
+            _filter = _filterBuilder.And(list.Cast<FilterDefinition<object>>());
+            return this;
+        }
+
+        public IFilterAdapter Not(object simple)
+        {
+            _filter = _filterBuilder.Not(simple as FilterDefinition<object>);
+            return this;
+        }
+
+        public IFilterAdapter Or(List<object> list)
+        {
+            _filter = _filterBuilder.Or(list.Cast<FilterDefinition<object>>());
+            return this;
+        }
     }
 
     public interface IFilterAdapter
     {
+        IFilterAdapter And(List<object> list);
+        IFilterAdapter Or(List<object> list);
+        IFilterAdapter Not(object simple);
     }
 
     public class FilterVisitor : FilterBaseVisitor<object>
     {
-        private readonly IFilterAdapter _adapter;
+        private IFilterAdapter _adapter;
         private FilterDefinitionBuilder<object> _filterBuilder = Builders<object>.Filter;
         private FilterDefinition<object> _filter = FilterDefinition<object>.Empty;
         private IFilterAdapter _filterAdapter;
@@ -75,11 +95,11 @@ namespace GoogleApiDesign.ApiUtilities
             if (context.AND().Length > 0)
             {
                 var list = context.sequence()
-                    .Select(sequence => VisitSequence(sequence) as FilterDefinition<object>)
+                    .Select(VisitSequence)
                     .ToList();
 
-                _filter = _filterBuilder.And(list);
-                return _filter;
+                _adapter = _adapter.And(list);
+                return _adapter;
             }
             return base.VisitExpression(context);
         }
@@ -89,11 +109,11 @@ namespace GoogleApiDesign.ApiUtilities
             if (context.OR().Length > 0)
             {
                 var list = context.term()
-                    .Select(term => VisitTerm(term) as FilterDefinition<object>)
+                    .Select(VisitTerm)
                     .ToList();
 
-                _filter = _filterBuilder.Or(list);
-                return _filter;
+                _adapter = _adapter.Or(list);
+                return _adapter;
             }
 
             return base.VisitFactor(context);
@@ -104,8 +124,9 @@ namespace GoogleApiDesign.ApiUtilities
             if (context.MINUS() != null || context.NOT() != null)
             {
                 var simple = VisitSimple(context.simple());
-                _filter = _filterBuilder.Not(simple as FilterDefinition<object>);
-                return _filter;
+
+                _adapter = _adapter.Not(simple);
+                return _adapter;
             }
 
             return base.VisitTerm(context);
