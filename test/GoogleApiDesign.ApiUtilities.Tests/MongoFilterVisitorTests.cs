@@ -10,14 +10,6 @@ namespace GoogleApiDesign.ApiUtilities.Tests
 {
     public class MongoFilterVisitorTests
     {
-        private FilterParser.FilterContext Setup(string text)
-        {
-            var inputStream = new AntlrInputStream(text);
-            var lexer = new FilterLexer(inputStream);
-            var tokenStream = new CommonTokenStream(lexer);
-           return new FilterParser(tokenStream).filter();
-        }
-
         [TestCase("=", "{ foo : 123 }")]
         [TestCase("<", "{ foo : { $lt : 123 } }")]
         [TestCase("<=", "{ foo : { $lte : 123 } }")]
@@ -28,14 +20,15 @@ namespace GoogleApiDesign.ApiUtilities.Tests
         public void ShouldParseComparators(string op, string expected)
         {
             // Arrange
-            var parser = Setup($"foo{op}123");
-            var visitor = new MongoFilterVisitor();
+            var filter = FilterBuilder
+                .FromString($"foo{op}123")
+                .UseAdapter(new MongoFilterAdapter());
 
             // Act
-            visitor.Visit(parser);
+            var fieldDefinition = filter.Build<FilterDefinition<object>>();
 
             // Assert
-            var value = ConvertToString(visitor.GetFilter());
+            var value = ConvertToString(fieldDefinition);
             value.Should().BeEquivalentTo(BsonDocument.Parse(expected));
         }
 
@@ -59,14 +52,15 @@ namespace GoogleApiDesign.ApiUtilities.Tests
         public void ShouldParseDataTypes(string input, string expected)
         {
             // Arrange
-            var parser = Setup($"foo={input}");
-            var visitor = new MongoFilterVisitor();
+            var filter = FilterBuilder
+                .FromString($"foo={input}")
+                .UseAdapter(new MongoFilterAdapter());
 
             // Act
-            visitor.Visit(parser);
+            var fieldDefinition = filter.Build<FilterDefinition<object>>();
 
             // Assert
-            var value = ConvertToString(visitor.GetFilter());
+            var value = ConvertToString(fieldDefinition);
             value.Should().BeEquivalentTo(BsonDocument.Parse(expected));
         }
 
@@ -78,48 +72,53 @@ namespace GoogleApiDesign.ApiUtilities.Tests
         public void ShouldParseNegationOperations(string text, string expectedQuery)
         {
             // Arrange
-            var parser = Setup(text);
-            var visitor = new MongoFilterVisitor();
+            var filter = FilterBuilder
+                .FromString(text)
+                .UseAdapter(new MongoFilterAdapter());
 
             // Act
-            visitor.Visit(parser);
+            var fieldDefinition = filter.Build<FilterDefinition<object>>();
 
             // Assert
-            var value = ConvertToString(visitor.GetFilter());
+            var value = ConvertToString(fieldDefinition);
             value.Should().BeEquivalentTo(BsonDocument.Parse(expectedQuery));
         }
 
         [TestCase("foo=bar AND foo!=baz", "{ $and : [ { foo : \"bar\" }, { foo : { $ne: \"baz\" } } ] }")]
         [TestCase("foo=bar AND temp<=100", "{ foo: \"bar\", temp: { $lte: 100 } } ")]
-        [TestCase("foo=bar AND temp<=100 AND isDeleted=false", "{ foo: \"bar\", temp: { $lte: 100 }, isDeleted: false } ")]
+        [TestCase("foo=bar AND temp<=100 AND isDeleted=false",
+            "{ foo: \"bar\", temp: { $lte: 100 }, isDeleted: false } ")]
         public void ShouldHandleAndOperators(string text, string expectedQuery)
         {
             // Arrange
-            var parser = Setup(text);
-            var visitor = new MongoFilterVisitor();
+            var filter = FilterBuilder
+                .FromString(text)
+                .UseAdapter(new MongoFilterAdapter());
 
             // Act
-            visitor.Visit(parser);
+            var fieldDefinition = filter.Build<FilterDefinition<object>>();
 
             // Assert
-            var value = ConvertToString(visitor.GetFilter());
+            var value = ConvertToString(fieldDefinition);
             value.Should().BeEquivalentTo(BsonDocument.Parse(expectedQuery));
         }
 
         [TestCase("foo=bar OR foo!=baz", "{ $or : [ { foo : \"bar\" }, { foo : { $ne: \"baz\" } } ] }")]
         [TestCase("foo=bar OR temp<=100", "{ $or: [{ foo: \"bar\" }, { temp: { $lte: 100 } } ] }")]
-        [TestCase("foo=bar OR foo=\"baz\" OR isDeleted=false", "{ $or : [ { foo : \"bar\" }, { foo : \"baz\" }, { isDeleted: false } ] }")]
+        [TestCase("foo=bar OR foo=\"baz\" OR isDeleted=false",
+            "{ $or : [ { foo : \"bar\" }, { foo : \"baz\" }, { isDeleted: false } ] }")]
         public void ShouldHandleOrOperators(string text, string expectedQuery)
         {
             // Arrange
-            var parser = Setup(text);
-            var visitor = new MongoFilterVisitor();
+            var filter = FilterBuilder
+                .FromString(text)
+                .UseAdapter(new MongoFilterAdapter());
 
             // Act
-            visitor.Visit(parser);
+            var fieldDefinition = filter.Build<FilterDefinition<object>>();
 
             // Assert
-            var value = ConvertToString(visitor.GetFilter());
+            var value = ConvertToString(fieldDefinition);
             value.Should().BeEquivalentTo(BsonDocument.Parse(expectedQuery));
         }
 
@@ -129,14 +128,15 @@ namespace GoogleApiDesign.ApiUtilities.Tests
         public void ShouldHandleTraversalOperations(string text, string expectedQuery)
         {
             // Arrange
-            var parser = Setup(text);
-            var visitor = new MongoFilterVisitor();
+            var filter = FilterBuilder
+                .FromString(text)
+                .UseAdapter(new MongoFilterAdapter());
 
             // Act
-            visitor.Visit(parser);
+            var fieldDefinition = filter.Build<FilterDefinition<object>>();
 
             // Assert
-            var value = ConvertToString(visitor.GetFilter());
+            var value = ConvertToString(fieldDefinition);
             value.Should().BeEquivalentTo(BsonDocument.Parse(expectedQuery));
         }
 
@@ -145,14 +145,15 @@ namespace GoogleApiDesign.ApiUtilities.Tests
         public void ShouldHandleWildCardSearches(string text, string expectedQuery)
         {
             // Arrange
-            var parser = Setup(text);
-            var visitor = new MongoFilterVisitor();
+            var filter = FilterBuilder
+                .FromString(text)
+                .UseAdapter(new MongoFilterAdapter());
 
             // Act
-            visitor.Visit(parser);
+            var fieldDefinition = filter.Build<FilterDefinition<object>>();
 
             // Assert
-            var value = ConvertToString(visitor.GetFilter());
+            var value = ConvertToString(fieldDefinition);
             value.Should().BeEquivalentTo(BsonDocument.Parse(expectedQuery));
         }
 

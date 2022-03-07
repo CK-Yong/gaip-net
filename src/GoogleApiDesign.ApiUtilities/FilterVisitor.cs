@@ -2,17 +2,74 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Antlr4.Runtime;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace GoogleApiDesign.ApiUtilities
 {
-    //todo: make this more generic by having a database adapter so we can swap out filter builders (e.g. towards SQL)
-    public class MongoFilterVisitor : FilterBaseVisitor<object>
+    public class FilterBuilder
+    {
+        private readonly FilterParser.FilterContext _filterContext;
+        private IFilterAdapter _adapter;
+        private FilterVisitor _visitor;
+
+
+        private FilterBuilder(string text)
+        {
+            var inputStream = new AntlrInputStream(text);
+            var lexer = new FilterLexer(inputStream);
+            var tokenStream = new CommonTokenStream(lexer);
+            _filterContext = new FilterParser(tokenStream).filter();
+        }
+
+        public static FilterBuilder FromString(string text)
+        {
+            return new FilterBuilder(text);
+        }
+
+        public FilterBuilder UseAdapter(IFilterAdapter adapter)
+        {
+            _visitor = new FilterVisitor(adapter);
+            return this;
+        }
+
+        public T Build<T>() where T: class
+        {
+            _visitor.Visit(_filterContext);
+            return _visitor.GetFilter() as T;
+        }
+    }
+    
+    public class MongoFilterAdapter : IFilterAdapter
     {
         private FilterDefinitionBuilder<object> _filterBuilder = Builders<object>.Filter;
         private FilterDefinition<object> _filter = FilterDefinition<object>.Empty;
+        
+        public MongoFilterAdapter()
+        {
+            
+        }
+        
+        
+    }
 
+    public interface IFilterAdapter
+    {
+    }
+
+    public class FilterVisitor : FilterBaseVisitor<object>
+    {
+        private readonly IFilterAdapter _adapter;
+        private FilterDefinitionBuilder<object> _filterBuilder = Builders<object>.Filter;
+        private FilterDefinition<object> _filter = FilterDefinition<object>.Empty;
+        private IFilterAdapter _filterAdapter;
+
+        public FilterVisitor(IFilterAdapter adapter)
+        {
+            _adapter = adapter;
+        }
+        
         public override object VisitExpression(FilterParser.ExpressionContext context)
         {
             if (context.AND().Length > 0)
