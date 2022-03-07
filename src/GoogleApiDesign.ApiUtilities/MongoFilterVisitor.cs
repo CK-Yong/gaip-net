@@ -83,7 +83,7 @@ namespace GoogleApiDesign.ApiUtilities
             {
                 var strValue = argValue.GetText().Trim('\"', '\'');
 
-                if (strValue.EndsWith("*"))
+                if (strValue.EndsWith('*'))
                 {
                     return _filterBuilder.Regex(comparable,
                         BsonRegularExpression.Create($"^{strValue.Substring(0, strValue.Length - 1)}"));
