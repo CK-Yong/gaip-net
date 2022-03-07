@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Antlr4.Runtime.Tree;
 using GoogleApiDesign.ApiUtilities.Contracts;
 
 namespace GoogleApiDesign.ApiUtilities
@@ -14,7 +16,7 @@ namespace GoogleApiDesign.ApiUtilities
         {
             _adapter = adapter;
         }
-        
+
         public override object VisitExpression(FilterParser.ExpressionContext context)
         {
             if (context.AND().Length > 0)
@@ -23,7 +25,7 @@ namespace GoogleApiDesign.ApiUtilities
                     .Select(VisitSequence)
                     .ToList();
 
-                return _adapter.And(list);
+               return _adapter.And(list);
             }
             return base.VisitExpression(context);
         }
@@ -33,7 +35,7 @@ namespace GoogleApiDesign.ApiUtilities
             if (context.OR().Length > 0)
             {
                 var list = context.term()
-                    .Select(x => VisitTerm(x))
+                    .Select(VisitTerm)
                     .ToList();
 
                 return _adapter.Or(list);
@@ -154,6 +156,11 @@ namespace GoogleApiDesign.ApiUtilities
             }
 
             return base.VisitValue(context);
+        }
+
+        protected override object AggregateResult(object aggregate, object nextResult)
+        {
+            return aggregate ?? nextResult;
         }
     }
 }

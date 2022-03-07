@@ -6,7 +6,6 @@ namespace GoogleApiDesign.ApiUtilities
     public class FilterBuilder
     {
         private readonly FilterParser.FilterContext _filterContext;
-        private IFilterAdapter _adapter;
         private FilterVisitor _visitor;
         
         private FilterBuilder(string text)
@@ -24,15 +23,14 @@ namespace GoogleApiDesign.ApiUtilities
 
         public FilterBuilder UseAdapter(IFilterAdapter adapter)
         {
-            _adapter = adapter;
             _visitor = new FilterVisitor(adapter);
             return this;
         }
 
         public T Build<T>() where T: class
         {
-            _visitor.Visit(_filterContext);
-            return _adapter.GetResult<T>();
+            var resultAdapter = _visitor.Visit(_filterContext);
+            return (resultAdapter! as IFilterAdapter).GetResult<T>();
         }
     }
 }
