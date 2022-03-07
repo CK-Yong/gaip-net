@@ -2,27 +2,30 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using MongoDB.Bson;
-using MongoDB.Driver;
+using Antlr4.Runtime.Tree;
+using GoogleApiDesign.ApiUtilities.Contracts;
 
 namespace GoogleApiDesign.ApiUtilities
 {
-    //todo: make this more generic by having a database adapter so we can swap out filter builders (e.g. towards SQL)
-    public class MongoFilterVisitor : FilterBaseVisitor<object>
+    public class FilterVisitor : FilterBaseVisitor<object>
     {
-        private FilterDefinitionBuilder<object> _filterBuilder = Builders<object>.Filter;
-        private FilterDefinition<object> _filter = FilterDefinition<object>.Empty;
+        private IFilterAdapter _adapter;
+        private IFilterAdapter _filterAdapter;
+
+        public FilterVisitor(IFilterAdapter adapter)
+        {
+            _adapter = adapter;
+        }
 
         public override object VisitExpression(FilterParser.ExpressionContext context)
         {
             if (context.AND().Length > 0)
             {
                 var list = context.sequence()
-                    .Select(sequence => VisitSequence(sequence) as FilterDefinition<object>)
+                    .Select(VisitSequence)
                     .ToList();
 
-                _filter = _filterBuilder.And(list);
-                return _filter;
+               return _adapter.And(list);
             }
             return base.VisitExpression(context);
         }
@@ -32,11 +35,10 @@ namespace GoogleApiDesign.ApiUtilities
             if (context.OR().Length > 0)
             {
                 var list = context.term()
-                    .Select(term => VisitTerm(term) as FilterDefinition<object>)
+                    .Select(VisitTerm)
                     .ToList();
 
-                _filter = _filterBuilder.Or(list);
-                return _filter;
+                return _adapter.Or(list);
             }
 
             return base.VisitFactor(context);
@@ -47,8 +49,8 @@ namespace GoogleApiDesign.ApiUtilities
             if (context.MINUS() != null || context.NOT() != null)
             {
                 var simple = VisitSimple(context.simple());
-                _filter = _filterBuilder.Not(simple as FilterDefinition<object>);
-                return _filter;
+
+               return _adapter.Not(simple);
             }
 
             return base.VisitTerm(context);
@@ -56,26 +58,24 @@ namespace GoogleApiDesign.ApiUtilities
 
         public override object VisitRestriction(FilterParser.RestrictionContext context)
         {
-            var comparable = (VisitComparable(context.comparable())).ToString();
+            var comparable = VisitComparable(context.comparable());
             var comparator = context.comparator().GetText();
             var arg = context.arg();
 
-            _filter = comparator switch
+            return comparator switch
             {
                 "=" => EqualityOrSearch(comparable, arg),
-                "<" => _filterBuilder.Lt(comparable, VisitArg(arg)),
-                "<=" => _filterBuilder.Lte(comparable, VisitArg(arg)),
-                ">=" => _filterBuilder.Gte(comparable, VisitArg(arg)),
-                ">" => _filterBuilder.Gt(comparable, VisitArg(arg)),
-                "!=" => _filterBuilder.Ne(comparable, VisitArg(arg)),
-                ":" => _filterBuilder.ElemMatch<object>(comparable, $"{{$eq: {VisitArg(arg)}}}"),
+                "<" => _adapter.LessThan(comparable, VisitArg(arg)),
+                "<=" => _adapter.LessThanEquals(comparable, VisitArg(arg)),
+                ">=" => _adapter.GreaterThanEquals(comparable, VisitArg(arg)),
+                ">" => _adapter.GreaterThan(comparable, VisitArg(arg)),
+                "!=" => _adapter.NotEquals(comparable, VisitArg(arg)),
+                ":" => _adapter.Has(comparable, VisitArg(arg)),
                 _ => throw new NotSupportedException()
             };
-
-            return _filter;
         }
 
-        private FilterDefinition<object> EqualityOrSearch(string? comparable, FilterParser.ArgContext arg)
+        private IFilterAdapter EqualityOrSearch(object comparable, FilterParser.ArgContext arg)
         {
             var argValue = arg.comparable().member().value().STRING();
 
@@ -85,17 +85,16 @@ namespace GoogleApiDesign.ApiUtilities
 
                 if (strValue.EndsWith('*'))
                 {
-                    return _filterBuilder.Regex(comparable,
-                        BsonRegularExpression.Create($"^{strValue.Substring(0, strValue.Length - 1)}"));
+                    return _adapter.PrefixSearch(comparable, strValue);
                 }
 
                 if (strValue.StartsWith('*'))
                 {
-                    return _filterBuilder.Regex(comparable,
-                        BsonRegularExpression.Create($"{strValue.Substring(1, strValue.Length - 1)}$"));
+                    return _adapter.SuffixSearch(comparable, strValue);
                 }
             }
-            return _filterBuilder.Eq(comparable, VisitArg(arg));
+
+            return _adapter.Equality(comparable, VisitArg(arg));
         }
 
         public override object VisitMember(FilterParser.MemberContext context)
@@ -159,9 +158,9 @@ namespace GoogleApiDesign.ApiUtilities
             return base.VisitValue(context);
         }
 
-        public FilterDefinition<object> GetFilter()
+        protected override object AggregateResult(object aggregate, object nextResult)
         {
-            return _filter;
+            return aggregate ?? nextResult;
         }
     }
 }
