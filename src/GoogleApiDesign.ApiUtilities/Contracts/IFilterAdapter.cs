@@ -16,6 +16,11 @@ namespace GoogleApiDesign.ApiUtilities.Contracts
         IFilterAdapter NotEquals(object comparable, object arg);
         IFilterAdapter Has(object comparable, object arg);
         IFilterAdapter Equality(object comparable, object arg);
+        
+        /// <summary>
+        /// Gets a representation of the resulting filter. May be different dependent on the adapter implementation.
+        /// </summary>
+        /// <typeparam name="T">The type that the resulting filter should be cast to.</typeparam>
         T GetResult<T>() where T : class;
     }
 }

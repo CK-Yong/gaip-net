@@ -23,8 +23,7 @@ namespace GoogleApiDesign.ApiUtilities
                     .Select(VisitSequence)
                     .ToList();
 
-                _adapter = _adapter.And(list);
-                return _adapter;
+                return _adapter.And(list);
             }
             return base.VisitExpression(context);
         }
@@ -37,8 +36,7 @@ namespace GoogleApiDesign.ApiUtilities
                     .Select(x => VisitTerm(x))
                     .ToList();
 
-                _adapter = _adapter.Or(list);
-                return _adapter;
+                return _adapter.Or(list);
             }
 
             return base.VisitFactor(context);
@@ -50,8 +48,7 @@ namespace GoogleApiDesign.ApiUtilities
             {
                 var simple = VisitSimple(context.simple());
 
-                _adapter = _adapter.Not(simple);
-                return _adapter;
+               return _adapter.Not(simple);
             }
 
             return base.VisitTerm(context);
