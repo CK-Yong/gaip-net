@@ -1,0 +1,1 @@
+java -jar /usr/local/lib/antlr-4.9.2-complete.jar -Dlanguage=CSharp ./src/GoogleApiDesign.ApiUtilities/Grammar/Filter.g4 -o ./src/GoogleApiDesign.ApiUtilities/Antlr4 -visitor
