@@ -11,7 +11,8 @@ To generate the required files you can use the command:
 antlr4 -Dlanguage=CSharp ./src/GoogleApiDesign.ApiUtilities/Grammar/Filter.g4 -o ./src/GoogleApiDesign.ApiUtilities/Antlr4 -visitor
 ```
 
-Also in the base of the project there is a script to this for you:
+Also in the base of the project there is a script to do this for you:
+
 
 ```bash
 ./build_grammar.sh
