@@ -8,9 +8,8 @@ on:
 
 jobs:
   build:
-
+    name: Build and test
     runs-on: ubuntu-latest
-    
     steps:
     - uses: actions/checkout@v2
 
@@ -28,3 +27,18 @@ jobs:
       with:
         file: .github/workflows/build.Dockerfile
         target: dotnet-test
+        tag: test-results
+        
+    - name: Copy test results
+      uses: actions/github-script@v6.0.0
+      with:
+        # The script to run
+        script: |
+          id=$(docker create test-results) && \
+          docker cp $id:/work/testresults .
+          
+    - name: Parse Trx files
+      uses: NasAmin/trx-parser@v0.2.0
+      id: trx-parser
+      with:
+        TRX_PATH: ${{ github.workspace }}/testresults 
