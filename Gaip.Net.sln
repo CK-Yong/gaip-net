@@ -4,9 +4,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{3430BA8E-A
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{110B44C1-9D1D-402B-8972-3F753F68AD29}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gaip.Net.Core.Tests", "test\Gaip.Net.Core.Tests\Gaip.Net.Core.Tests.csproj", "{D2CF7E37-F4A7-4D71-A0AE-B11DBFF5CF9E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gaip.Net.Mongo.Tests", "test\Gaip.Net.Mongo.Tests\Gaip.Net.Mongo.Tests.csproj", "{D2CF7E37-F4A7-4D71-A0AE-B11DBFF5CF9E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gaip.Net.Core", "src\Gaip.Net.Core\Gaip.Net.Core.csproj", "{C8BA7227-17C6-4AB2-AB18-4A9280B53F41}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gaip.Net.Mongo", "src\Gaip.Net.Mongo\Gaip.Net.Mongo.csproj", "{33474BBF-B379-431E-811C-7A2E90FF91FE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -16,6 +18,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{D2CF7E37-F4A7-4D71-A0AE-B11DBFF5CF9E} = {3430BA8E-A4A2-4BEE-8759-4B0F67E237FA}
 		{C8BA7227-17C6-4AB2-AB18-4A9280B53F41} = {110B44C1-9D1D-402B-8972-3F753F68AD29}
+		{33474BBF-B379-431E-811C-7A2E90FF91FE} = {110B44C1-9D1D-402B-8972-3F753F68AD29}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{D2CF7E37-F4A7-4D71-A0AE-B11DBFF5CF9E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -26,5 +29,9 @@ Global
 		{C8BA7227-17C6-4AB2-AB18-4A9280B53F41}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C8BA7227-17C6-4AB2-AB18-4A9280B53F41}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C8BA7227-17C6-4AB2-AB18-4A9280B53F41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{33474BBF-B379-431E-811C-7A2E90FF91FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{33474BBF-B379-431E-811C-7A2E90FF91FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{33474BBF-B379-431E-811C-7A2E90FF91FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{33474BBF-B379-431E-811C-7A2E90FF91FE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

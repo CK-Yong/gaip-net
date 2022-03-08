@@ -1,10 +1,11 @@
 using FluentAssertions;
+using Gaip.Net.Core;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using NUnit.Framework;
 
-namespace Gaip.Net.Core.Tests
+namespace Gaip.Net.Mongo.Tests
 {
     public class MongoFilterVisitorTests
     {

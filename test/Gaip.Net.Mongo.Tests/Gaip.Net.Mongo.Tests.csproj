@@ -14,6 +14,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\Gaip.Net.Core\Gaip.Net.Core.csproj" />
+      <ProjectReference Include="..\..\src\Gaip.Net.Mongo\Gaip.Net.Mongo.csproj" />
     </ItemGroup>
 
 </Project>

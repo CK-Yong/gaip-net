@@ -4,7 +4,7 @@ using Gaip.Net.Core.Contracts;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
-namespace Gaip.Net.Core
+namespace Gaip.Net.Mongo
 {
     public class MongoFilterAdapter : IFilterAdapter
     {
@@ -19,7 +19,7 @@ namespace Gaip.Net.Core
         {
             _filter = filter;
         }
-
+        
         public IFilterAdapter And(List<object> list)
         {
             var expressions = list
