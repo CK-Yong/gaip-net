@@ -33,4 +33,4 @@ FROM dotnet-restored AS dotnet-build
 RUN dotnet build --no-restore
 
 FROM dotnet-build AS dotnet-test
-RUN dotnet test --no-build --verbosity normal --loger trx --results-directory /work/testresults
+RUN dotnet test --no-build --verbosity normal --logger trx --results-directory /work/testresults
