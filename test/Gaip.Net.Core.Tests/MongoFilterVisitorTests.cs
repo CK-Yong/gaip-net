@@ -4,7 +4,7 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using NUnit.Framework;
 
-namespace GoogleApiDesign.ApiUtilities.Tests
+namespace Gaip.Net.Core.Tests
 {
     public class MongoFilterVisitorTests
     {

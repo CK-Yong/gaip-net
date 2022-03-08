@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace GoogleApiDesign.ApiUtilities.Contracts
+namespace Gaip.Net.Core.Contracts
 {
     public interface IFilterAdapter
     {

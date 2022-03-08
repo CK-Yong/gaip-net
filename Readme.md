@@ -1,4 +1,4 @@
-﻿# Google API Utilities for C#
+﻿# Google API Improvement Proposal (GAIP) Utilities for C#
 This project is an attempt to create a simple to use library that implements Google's API Improvement Proposals. Currently, only [AIP-160](https://google.aip.dev/160) is being implemented, but features like sorting could follow. The project is still very fresh, so no stability is guaranteed outside of what is tested in the provided unit tests.
 
 # Usage

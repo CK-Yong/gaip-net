@@ -2,7 +2,6 @@
 
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
-
         <IsPackable>false</IsPackable>
     </PropertyGroup>
 
@@ -14,7 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\src\GoogleApiDesign.ApiUtilities\GoogleApiDesign.ApiUtilities.csproj" />
+      <ProjectReference Include="..\..\src\Gaip.Net.Core\Gaip.Net.Core.csproj" />
     </ItemGroup>
 
 </Project>

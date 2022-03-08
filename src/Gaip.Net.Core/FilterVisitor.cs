@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using Antlr4.Runtime.Tree;
-using GoogleApiDesign.ApiUtilities.Contracts;
+using Gaip.Net.Core.Contracts;
 
-namespace GoogleApiDesign.ApiUtilities
+namespace Gaip.Net.Core
 {
     public class FilterVisitor : FilterBaseVisitor<object>
     {

@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using GoogleApiDesign.ApiUtilities.Contracts;
+using Gaip.Net.Core.Contracts;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
-namespace GoogleApiDesign.ApiUtilities
+namespace Gaip.Net.Core
 {
     public class MongoFilterAdapter : IFilterAdapter
     {

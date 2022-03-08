@@ -1,7 +1,7 @@
 ﻿using Antlr4.Runtime;
-using GoogleApiDesign.ApiUtilities.Contracts;
+using Gaip.Net.Core.Contracts;
 
-namespace GoogleApiDesign.ApiUtilities
+namespace Gaip.Net.Core
 {
     public class FilterBuilder
     {
