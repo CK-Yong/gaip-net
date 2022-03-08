@@ -12,7 +12,7 @@ var filterDefinition = FilterBuilder
                         .Build<FilterDefinition<object>>;
 
 IMongoCollection<SomeThing> myCollection = ... // However you want to instantiate your collection
-
+ 
 myCollection.Find(filterDefinition.ToBsonDocument());
 ```
 The resulting query would then look something like this:
