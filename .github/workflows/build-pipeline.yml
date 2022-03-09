@@ -35,9 +35,9 @@ jobs:
         id=$(docker create test-results)
         docker cp $id:/work/testresults .
           
-    - name: Parse Trx files
-      uses: NasAmin/trx-parser@v0.2.0
-      id: trx-parser
+    - name: Upload dotnet test results
+      uses: actions/upload-artifact@v3
       with:
-        TRX_PATH: ${{ github.workspace }}/testresults 
-        REPO_TOKEN: ${{ secrets.WORKFLOW_UPDATE_TOKEN }}
+        name: TestResults
+        path: /testresults
+      if: ${{ always() }}
