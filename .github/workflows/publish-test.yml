@@ -1,0 +1,20 @@
+name: publish-test
+
+on:
+  workflow_run:
+    workflows: ['build-and-test']
+    types:
+      - completed
+
+jobs:
+  build:
+    name: Publish test run
+    runs-on: ubuntu-latest
+    steps:
+    - name: Publish test results 
+      uses: dorny/test-reporter@v1
+      with:
+        artifact: test-results
+        name: DotNet Tests
+        path: '*.trx'
+        reporter: dotnet-trx
