@@ -38,6 +38,14 @@ jobs:
     - name: Upload dotnet test results
       uses: actions/upload-artifact@v3
       with:
-        name: TestResults
+        name: test-results
         path: ${{ github.workspace }}/testresults
       if: ${{ always() }}
+
+    - name: Publish test results 
+      uses: dorny/test-reporter@v1
+      with:
+        artifact: test-results            # artifact name
+        name: DotNet Tests                # Name of the check run which will be created
+        path: '*.xml'                     # Path to test results (inside artifact .zip)
+        reporter: dotnet-trx              
