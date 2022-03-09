@@ -34,3 +34,12 @@ RUN dotnet build --no-restore
 
 FROM dotnet-build AS dotnet-test
 RUN dotnet test --no-build --verbosity normal --logger trx --results-directory /work/testresults
+
+FROM dotnet-build AS dotnet-pack
+ARG ProjectName
+ARG Version
+
+ENV PROJECT_NAME=$ProjectName
+ENV VERSION=$Version
+
+RUN dotnet pack ./src/"$PROJECT_NAME"/"$PROJECT_NAME".csproj --no-build --output /output -p:Version="$VERSION"
