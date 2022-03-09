@@ -39,5 +39,5 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: TestResults
-        path: /testresults
+        path: /work/testresults
       if: ${{ always() }}
