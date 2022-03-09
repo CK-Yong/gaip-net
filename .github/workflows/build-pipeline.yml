@@ -28,6 +28,7 @@ jobs:
         file: .github/workflows/build.Dockerfile
         target: dotnet-test
         tags: test-results:latest
+        load: true
         
     - name: Copy test results
       run: |
