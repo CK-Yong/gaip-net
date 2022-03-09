@@ -33,11 +33,11 @@ jobs:
     - name: Copy test results
       run: |
         id=$(docker create test-results)
-        docker cp $id:/work/testresults .
+        docker cp $id:/work/testresults ${{ github.workspace }}/testresults
           
     - name: Upload dotnet test results
       uses: actions/upload-artifact@v3
       with:
         name: TestResults
-        path: ${{ github.workspace }}/work/testresults
+        path: ${{ github.workspace }}/testresults
       if: ${{ always() }}
