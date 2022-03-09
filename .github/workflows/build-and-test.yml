@@ -1,4 +1,4 @@
-name: .NET
+name: build-and-test
 
 on:
   push:
@@ -41,11 +41,3 @@ jobs:
         name: test-results
         path: ${{ github.workspace }}/testresults
       if: ${{ always() }}
-
-    - name: Publish test results 
-      uses: dorny/test-reporter@v1
-      with:
-        artifact: test-results
-        name: DotNet Tests
-        path: '*.trx'
-        reporter: dotnet-trx
