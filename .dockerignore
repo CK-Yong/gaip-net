@@ -1,6 +1,6 @@
 .github
 .git
 .idea
-*.md
 *.DotSettings.user
 output
+Readme.md
