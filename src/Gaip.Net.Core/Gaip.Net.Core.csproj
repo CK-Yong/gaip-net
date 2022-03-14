@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <Owners>Chee Kent Yong</Owners>
+        <Authors>ckyong</Authors>
         <PackageLicenseFile>License.md</PackageLicenseFile>
         <ProjectUrl>https://github.com/CK-Yong/gaip-net</ProjectUrl>
         <RepositoryUrl>https://github.com/CK-Yong/gaip-net</RepositoryUrl>
@@ -17,6 +17,7 @@
         <Tags>google aip api improvement proposals filtering sorting query search</Tags>
         <Copyright>Copyright (c) Chee Kent Yong and Contributors. MIT License.</Copyright>
     </PropertyGroup>
+    
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
     </PropertyGroup>
@@ -26,7 +27,7 @@
     </ItemGroup>
     
     <ItemGroup>
-        <PackageReference Include="Antlr4.Runtime.Standard" Version="4.9.3"/>
+        <PackageReference Include="Antlr4.Runtime.Standard" Version="4.9.3" />
     </ItemGroup>
 
 </Project>
