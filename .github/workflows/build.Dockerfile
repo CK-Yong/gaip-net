@@ -41,9 +41,3 @@ ENV VERSION=$Version
 
 RUN dotnet pack ./src/Gaip.Net.Core/Gaip.Net.Core.csproj --no-build --output /output -p:Version="$VERSION"
 RUN dotnet pack ./src/Gaip.Net.Mongo/Gaip.Net.Mongo.csproj --no-build --output /output -p:Version="$VERSION"
-
-FROM dotnet-pack AS dotnet-push
-ARG NugetPat
-ENV NUGET_PAT=$NugetPat
-
-RUN dotnet nuget push "/output/*.nupkg" -k $NUGET_PAT -s https://api.nuget.org/v3/index.json
