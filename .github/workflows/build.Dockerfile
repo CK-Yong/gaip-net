@@ -36,10 +36,14 @@ FROM dotnet-build AS dotnet-test
 RUN dotnet test --no-build --verbosity normal --logger trx --results-directory /work/testresults
 
 FROM dotnet-build AS dotnet-pack
-ARG ProjectName
 ARG Version
-
-ENV PROJECT_NAME=$ProjectName
 ENV VERSION=$Version
 
-RUN dotnet pack ./src/"$PROJECT_NAME"/"$PROJECT_NAME".csproj --no-build --output /output -p:Version="$VERSION"
+RUN dotnet pack ./src/Gaip.Net.Core/Gaip.Net.Core.csproj --no-build --output /output -p:Version="$VERSION"
+RUN dotnet pack ./src/Gaip.Net.Mongo/Gaip.Net.Mongo.csproj --no-build --output /output -p:Version="$VERSION"
+
+FROM dotnet-pack AS dotnet-push
+ARG NugetPat
+ENV NUGET_PAT=$NugetPat
+
+RUN dotnet nuget push "/output/*.nupkg" -k $NUGET_PAT -s https://api.nuget.org/v3/index.json
