@@ -62,7 +62,7 @@ jobs:
         uses: actions/download-artifact@v3.0.0
         with:
           name: gaip-net-build
-          path: /tmp/gaip-net-build.tar
+          path: /tmp
 
       - name: Docker Setup Buildx
         uses: docker/setup-buildx-action@v1.6.0
