@@ -77,4 +77,4 @@ jobs:
           file: .github/workflows/build.Dockerfile
           target: dotnet-push
           tags: gaip-net/packages:latest
-          build-args: Version=0.0.1-alpha,NugetPat={{ secrets.NUGET_PAT }} # For now, hardcode the version
+          build-args: Version=0.0.1-alpha,NugetPat=${{ secrets.NUGET_PAT }} # For now, hardcode the version
