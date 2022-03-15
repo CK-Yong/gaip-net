@@ -24,7 +24,6 @@ jobs:
         file: .github/workflows/build.Dockerfile
         target: dotnet-build
         tags: gaip-net/build:latest
-        cache-to: type=local,mode=max,dest=/tmp/.docker-cache
     
     - name: Run tests
       uses: docker/build-push-action@v2.9.0
@@ -38,12 +37,6 @@ jobs:
       run: |
         id=$(docker create test-results)
         docker cp $id:/work/testresults ${{ github.workspace }}/testresults
-          
-    - name: Upload build cache
-      uses: actions/upload-artifact@v2
-      with:
-        name: docker-cache
-        path: /tmp/.docker-cache
       
     - name: Upload dotnet test results
       uses: actions/upload-artifact@v3
@@ -52,28 +45,31 @@ jobs:
         path: ${{ github.workspace }}/testresults
       if: ${{ always() }}
       
-  deploy:
-    name: Create and deploy packages
-    runs-on: ubuntu-latest
-    needs: [ build ]
-    if: github.event_name != 'pull_request'
-    steps:
-      - name: Checkout build artifacts
-        uses: actions/download-artifact@v3.0.0
-        with:
-          name: docker-cache
-          path: /tmp
+    # Build and push packages
+    - name: Install GitVersion
+      id: gitversion-setup
+      uses: gittools/actions/gitversion/setup@v0.9.7
+      if: github.event_name != 'pull_request'
+      with:
+        versionSpec: '5.x'
 
-      - name: Docker Setup Buildx
-        uses: docker/setup-buildx-action@v1.6.0
-        
-      - uses: docker/build-push-action@v2.9.0
-        with:
-          file: .github/workflows/build.Dockerfile
-          tags: gaip-net/packages:latest
-          build-args: Version=0.0.1-alpha
-          load: true
-          cache-from: type=local,src=/tmp/.docker-cache
-          
-      - run : |
-          docker run gaip-net/packages:latest dotnet nuget push /output/*.nupkg -k ${{ secrets.NUGET_PAT }} -s https://api.nuget.org/v3/index.json
+    - name: Determine Version
+      if: steps.gitversion-setup.outcome == 'success'
+      id: gitversion
+      uses: gittools/actions/gitversion/execute@v0.9.7
+            
+    - uses: docker/build-push-action@v2.9.0
+      name: Prepare packages
+      if: steps.gitversion-setup.outcome == 'success'
+      with:
+        file: .github/workflows/build.Dockerfile
+        tags: gaip-net/packages:latest
+        target: dotnet-pack
+        build-args: Version=${{ steps.gitversion.outputs.fullSemVer }}-${{ steps.gitversion.outputs.nuGetPreReleaseTagV2 }}
+        load: true
+        cache-from: type=local,src=/tmp/.docker-cache
+      
+    - name: Push to Nuget
+      if: steps.gitversion-setup.outcome == 'success'
+      run : |
+        docker run gaip-net/packages:latest dotnet nuget push /output/*.nupkg -k ${{ secrets.NUGET_PAT }} -s https://api.nuget.org/v3/index.json
