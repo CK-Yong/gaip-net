@@ -48,7 +48,7 @@ jobs:
     # Build and push packages
     - name: Install GitVersion
       id: gitversion-setup
-      uses: gittools/actions/gitversion/setup@v0.9.7
+      uses: GitTools/actions/gitversion/setup@v0.9.11
       if: github.event_name != 'pull_request'
       with:
         versionSpec: '5.x'
@@ -56,7 +56,7 @@ jobs:
     - name: Determine Version
       if: steps.gitversion-setup.outcome == 'success'
       id: gitversion
-      uses: gittools/actions/gitversion/execute@v0.9.7
+      uses: GitTools/actions/gitversion/execute@v0.9.11
             
     - uses: docker/build-push-action@v2.9.0
       name: Prepare packages
