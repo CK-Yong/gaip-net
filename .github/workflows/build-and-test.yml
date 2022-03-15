@@ -54,7 +54,7 @@ jobs:
         file: .github/workflows/build.Dockerfile
         tags: gaip-net/packages:latest
         target: dotnet-pack
-        build-args: Version=0.0.${{ github.run_number }}-alpha
+        build-args: Version=0.0.1-alpha.${{ github.run_number }} 
         load: true
         cache-from: type=local,src=/tmp/.docker-cache
       
