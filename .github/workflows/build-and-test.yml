@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
   pull_request:
-    branches: [ main ]
+    branches: [ main ] 
 
 jobs:
   build:
@@ -22,7 +22,6 @@ jobs:
         file: .github/workflows/build.Dockerfile
         target: dotnet-build
         tags: gaip-net/build:latest
-        outputs: type=docker,dest=/tmp/gaip-net-build.tar   
     
     - name: Run tests
       uses: docker/build-push-action@v2.9.0
@@ -36,12 +35,6 @@ jobs:
       run: |
         id=$(docker create test-results)
         docker cp $id:/work/testresults ${{ github.workspace }}/testresults
-          
-    - name: Upload build image
-      uses: actions/upload-artifact@v2
-      with:
-        name: gaip-net-build
-        path: /tmp/gaip-net-build.tar
       
     - name: Upload dotnet test results
       uses: actions/upload-artifact@v3
@@ -49,3 +42,19 @@ jobs:
         name: test-results
         path: ${{ github.workspace }}/testresults
       if: ${{ always() }}
+      
+    # Build and push packages           
+    - uses: docker/build-push-action@v2.9.0
+      id: package
+      name: Prepare packages
+      if: github.event_name != 'pull_request'
+      with:
+        file: .github/workflows/build.Dockerfile
+        tags: gaip-net/packages:latest
+        target: dotnet-pack
+        build-args: Version=0.0.1-alpha.${{ github.run_number }} 
+      
+    - name: Push to Nuget
+      if: steps.package.outcome == 'success'
+      run : |
+        docker run gaip-net/packages:latest dotnet nuget push /output/*.nupkg -k ${{ secrets.NUGET_PAT }} -s https://api.nuget.org/v3/index.json

@@ -34,3 +34,10 @@ RUN dotnet build --no-restore
 
 FROM dotnet-build AS dotnet-test
 RUN dotnet test --no-build --verbosity normal --logger trx --results-directory /work/testresults
+
+FROM dotnet-build AS dotnet-pack
+ARG Version
+ENV VERSION=$Version
+
+RUN dotnet pack ./src/Gaip.Net.Core/Gaip.Net.Core.csproj --no-build --output /output -p:Version="$VERSION"
+RUN dotnet pack ./src/Gaip.Net.Mongo/Gaip.Net.Mongo.csproj --no-build --output /output -p:Version="$VERSION"
