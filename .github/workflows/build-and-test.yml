@@ -45,31 +45,20 @@ jobs:
         path: ${{ github.workspace }}/testresults
       if: ${{ always() }}
       
-    # Build and push packages
-    - name: Install GitVersion
-      id: gitversion-setup
-      uses: GitTools/actions/gitversion/setup@v0.9.11
-      if: github.event_name != 'pull_request'
-      with:
-        versionSpec: '5.x'
-
-    - name: Determine Version
-      if: steps.gitversion-setup.outcome == 'success'
-      id: gitversion
-      uses: GitTools/actions/gitversion/execute@v0.9.11
-            
+    # Build and push packages           
     - uses: docker/build-push-action@v2.9.0
+      id: package
       name: Prepare packages
-      if: steps.gitversion-setup.outcome == 'success'
+      if: github.event_name != 'pull_request'
       with:
         file: .github/workflows/build.Dockerfile
         tags: gaip-net/packages:latest
         target: dotnet-pack
-        build-args: Version=${{ steps.gitversion.outputs.fullSemVer }}-${{ steps.gitversion.outputs.nuGetPreReleaseTagV2 }}
+        build-args: Version=0.0.${{ github.run_number }}-alpha
         load: true
         cache-from: type=local,src=/tmp/.docker-cache
       
     - name: Push to Nuget
-      if: steps.gitversion-setup.outcome == 'success'
+      if: steps.package.outcome == 'success'
       run : |
         docker run gaip-net/packages:latest dotnet nuget push /output/*.nupkg -k ${{ secrets.NUGET_PAT }} -s https://api.nuget.org/v3/index.json
