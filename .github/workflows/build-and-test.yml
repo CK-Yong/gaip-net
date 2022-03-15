@@ -53,6 +53,7 @@ jobs:
         tags: gaip-net/packages:latest
         target: dotnet-pack
         build-args: Version=0.0.1-alpha.${{ github.run_number }} 
+        load: true
       
     - name: Push to Nuget
       if: steps.package.outcome == 'success'
