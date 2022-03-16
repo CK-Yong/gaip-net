@@ -6,96 +6,100 @@ using MongoDB.Driver;
 
 namespace Gaip.Net.Mongo
 {
-    public class MongoFilterAdapter<T> : IFilterAdapter<FilterDefinition<T>>
+    /// <summary>
+    /// Filter adapter for MongoDB. Using this class allows you to obtain a <see cref="FilterDefinition{TDocument}"/>. Supports Mongo C# driver attributes.
+    /// </summary>
+    /// <typeparam name="TDocument">The type of the document that will be queried.</typeparam>
+    public sealed class MongoFilterAdapter<TDocument> : IFilterAdapter<FilterDefinition<TDocument>>
     {
-        private readonly FilterDefinitionBuilder<T> _filterBuilder = Builders<T>.Filter;
-        private readonly FilterDefinition<T> _filter;
+        private readonly FilterDefinitionBuilder<TDocument> _filterBuilder = Builders<TDocument>.Filter;
+        private readonly FilterDefinition<TDocument> _filter;
 
         public MongoFilterAdapter()
         {
         }
         
-        private MongoFilterAdapter(FilterDefinition<T> filter)
+        private MongoFilterAdapter(FilterDefinition<TDocument> filter)
         {
             _filter = filter;
         }
         
-        public IFilterAdapter<FilterDefinition<T>> And(List<object> list)
+        public IFilterAdapter<FilterDefinition<TDocument>> And(List<object> list)
         {
             var expressions = list
-                .Cast<IFilterAdapter<FilterDefinition<T>>>()
+                .Cast<IFilterAdapter<FilterDefinition<TDocument>>>()
                 .Select(x => x.GetResult());
-            return new MongoFilterAdapter<T>(_filterBuilder.And(expressions));
+            return new MongoFilterAdapter<TDocument>(_filterBuilder.And(expressions));
         }
 
-        public IFilterAdapter<FilterDefinition<T>> Or(List<object> list)
+        public IFilterAdapter<FilterDefinition<TDocument>> Or(List<object> list)
         {
             var expressions = list
-                .Cast<IFilterAdapter<FilterDefinition<T>>>()
+                .Cast<IFilterAdapter<FilterDefinition<TDocument>>>()
                 .Select(x => x.GetResult());
-            return new MongoFilterAdapter<T>(_filterBuilder.Or(expressions));
+            return new MongoFilterAdapter<TDocument>(_filterBuilder.Or(expressions));
         }
 
-        public IFilterAdapter<FilterDefinition<T>> Not(object simple)
+        public IFilterAdapter<FilterDefinition<TDocument>> Not(object simple)
         {
-            return new MongoFilterAdapter<T>(_filterBuilder.Not((simple as MongoFilterAdapter<T>)!.GetResult()));
+            return new MongoFilterAdapter<TDocument>(_filterBuilder.Not((simple as MongoFilterAdapter<TDocument>)!.GetResult()));
         }
 
-        public IFilterAdapter<FilterDefinition<T>> PrefixSearch(object comparable, string strValue)
+        public IFilterAdapter<FilterDefinition<TDocument>> PrefixSearch(object comparable, string strValue)
         {
-            FieldDefinition<T, object> field = comparable.ToString();
-            return new MongoFilterAdapter<T>(_filterBuilder.Regex(field, BsonRegularExpression.Create($"^{strValue.Substring(0, strValue.Length - 1)}")));
+            FieldDefinition<TDocument, object> field = comparable.ToString();
+            return new MongoFilterAdapter<TDocument>(_filterBuilder.Regex(field, BsonRegularExpression.Create($"^{strValue.Substring(0, strValue.Length - 1)}")));
         }
 
-        public IFilterAdapter<FilterDefinition<T>> SuffixSearch(object comparable, string strValue)
+        public IFilterAdapter<FilterDefinition<TDocument>> SuffixSearch(object comparable, string strValue)
         {
-            FieldDefinition<T, object> field = comparable.ToString();
-            return new MongoFilterAdapter<T>(_filterBuilder.Regex(field, BsonRegularExpression.Create($"{strValue.Substring(1, strValue.Length - 1)}$")));
+            FieldDefinition<TDocument, object> field = comparable.ToString();
+            return new MongoFilterAdapter<TDocument>(_filterBuilder.Regex(field, BsonRegularExpression.Create($"{strValue.Substring(1, strValue.Length - 1)}$")));
         }
 
-        public IFilterAdapter<FilterDefinition<T>> LessThan(object comparable, object arg)
+        public IFilterAdapter<FilterDefinition<TDocument>> LessThan(object comparable, object arg)
         {
-            FieldDefinition<T, object> field = comparable.ToString();
-            return new MongoFilterAdapter<T>(_filterBuilder.Lt(field, arg));
+            FieldDefinition<TDocument, object> field = comparable.ToString();
+            return new MongoFilterAdapter<TDocument>(_filterBuilder.Lt(field, arg));
         }
 
-        public IFilterAdapter<FilterDefinition<T>> LessThanEquals(object comparable, object arg)
+        public IFilterAdapter<FilterDefinition<TDocument>> LessThanEquals(object comparable, object arg)
         {
-            FieldDefinition<T, object> field = comparable.ToString();
-            return new MongoFilterAdapter<T>(_filterBuilder.Lte(field, arg));
+            FieldDefinition<TDocument, object> field = comparable.ToString();
+            return new MongoFilterAdapter<TDocument>(_filterBuilder.Lte(field, arg));
         }
 
-        public IFilterAdapter<FilterDefinition<T>> GreaterThanEquals(object comparable, object arg)
+        public IFilterAdapter<FilterDefinition<TDocument>> GreaterThanEquals(object comparable, object arg)
         {
-            FieldDefinition<T, object> field = comparable.ToString();
-            return new MongoFilterAdapter<T>(_filterBuilder.Gte(field, arg));
+            FieldDefinition<TDocument, object> field = comparable.ToString();
+            return new MongoFilterAdapter<TDocument>(_filterBuilder.Gte(field, arg));
         }
 
-        public IFilterAdapter<FilterDefinition<T>> GreaterThan(object comparable, object arg)
+        public IFilterAdapter<FilterDefinition<TDocument>> GreaterThan(object comparable, object arg)
         {
-            FieldDefinition<T, object> field = comparable.ToString();
-            return new MongoFilterAdapter<T>(_filterBuilder.Gt(field, arg));
+            FieldDefinition<TDocument, object> field = comparable.ToString();
+            return new MongoFilterAdapter<TDocument>(_filterBuilder.Gt(field, arg));
         }
 
-        public IFilterAdapter<FilterDefinition<T>> NotEquals(object comparable, object arg)
+        public IFilterAdapter<FilterDefinition<TDocument>> NotEquals(object comparable, object arg)
         {
-            FieldDefinition<T, object> field = comparable.ToString();
-            return new MongoFilterAdapter<T>(_filterBuilder.Ne(field, arg));
+            FieldDefinition<TDocument, object> field = comparable.ToString();
+            return new MongoFilterAdapter<TDocument>(_filterBuilder.Ne(field, arg));
         }
 
-        public IFilterAdapter<FilterDefinition<T>> Has(object comparable, object arg)
+        public IFilterAdapter<FilterDefinition<TDocument>> Has(object comparable, object arg)
         {
-            FieldDefinition<T, object> field = comparable.ToString();
-            return new MongoFilterAdapter<T>(_filterBuilder.ElemMatch<object>(field, $"{{$eq: {arg}}}"));
+            FieldDefinition<TDocument, object> field = comparable.ToString();
+            return new MongoFilterAdapter<TDocument>(_filterBuilder.ElemMatch<object>(field, $"{{$eq: {arg}}}"));
         }
 
-        public IFilterAdapter<FilterDefinition<T>> Equality(object comparable, object arg)
+        public IFilterAdapter<FilterDefinition<TDocument>> Equality(object comparable, object arg)
         {
-            FieldDefinition<T, object> field = comparable.ToString();
-            return new MongoFilterAdapter<T>(_filterBuilder.Eq(field, arg));
+            FieldDefinition<TDocument, object> field = comparable.ToString();
+            return new MongoFilterAdapter<TDocument>(_filterBuilder.Eq(field, arg));
         }
 
-        public FilterDefinition<T> GetResult() 
+        public FilterDefinition<TDocument> GetResult() 
         {
             return _filter;
         }
