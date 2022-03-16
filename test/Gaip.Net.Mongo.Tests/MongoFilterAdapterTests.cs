@@ -1,8 +1,6 @@
 using FluentAssertions;
 using Gaip.Net.Core;
 using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
-using MongoDB.Driver;
 using NUnit.Framework;
 
 namespace Gaip.Net.Mongo.Tests;
@@ -17,7 +15,7 @@ public class MongoFilterVisitorTests
     [TestCase(">", "{ foo : { $gt : 123 } }")]
     [TestCase("!=", "{ foo : { $ne : 123 } }")]
     [TestCase(":", "{ foo : { $elemMatch : { $eq: 123 } } }")]
-    public void ShouldParseComparators(string op, string expected)
+    public void Should_parse_comparators(string op, string expected)
     {
         // Arrange
         var filter = FilterBuilder
@@ -28,7 +26,7 @@ public class MongoFilterVisitorTests
         var fieldDefinition = filter.Build();
 
         // Assert
-        var value = ConvertToString(fieldDefinition);
+        var value = fieldDefinition.ConvertToBsonDocument();
         value.Should().BeEquivalentTo(BsonDocument.Parse(expected));
     }
 
@@ -49,7 +47,7 @@ public class MongoFilterVisitorTests
     // Durations
     [TestCase("1s", "{ foo : 1000 }")] // Store as millis
     [TestCase("1.234s", "{ foo : 1234 }")] // Store as millis
-    public void ShouldParseDataTypes(string input, string expected)
+    public void Should_parse_data_types(string input, string expected)
     {
         // Arrange
         var filter = FilterBuilder
@@ -60,7 +58,7 @@ public class MongoFilterVisitorTests
         var fieldDefinition = filter.Build();
 
         // Assert
-        var value = ConvertToString(fieldDefinition);
+        var value = fieldDefinition.ConvertToBsonDocument();
         value.Should().BeEquivalentTo(BsonDocument.Parse(expected));
     }
 
@@ -69,7 +67,7 @@ public class MongoFilterVisitorTests
     [TestCase("NOT foo>bar", "{ foo : { $not : { $gt: \"bar\" }}}")]
     [TestCase("-foo<bar", "{ foo : { $not : { $lt: \"bar\" }}}")]
     [TestCase("NOT foo>=bar", "{ foo : { $not : { $gte: \"bar\" }}}")]
-    public void ShouldParseNegationOperations(string text, string expectedQuery)
+    public void Should_handle_negation_operators(string text, string expectedQuery)
     {
         // Arrange
         var filter = FilterBuilder
@@ -80,7 +78,7 @@ public class MongoFilterVisitorTests
         var fieldDefinition = filter.Build();
 
         // Assert
-        var value = ConvertToString(fieldDefinition);
+        var value = fieldDefinition.ConvertToBsonDocument();
         value.Should().BeEquivalentTo(BsonDocument.Parse(expectedQuery));
     }
 
@@ -88,7 +86,7 @@ public class MongoFilterVisitorTests
     [TestCase("foo=bar AND temp<=100", "{ foo: \"bar\", temp: { $lte: 100 } } ")]
     [TestCase("foo=bar AND temp<=100 AND isDeleted=false",
         "{ foo: \"bar\", temp: { $lte: 100 }, isDeleted: false } ")]
-    public void ShouldHandleAndOperators(string text, string expectedQuery)
+    public void Should_handle_and_operators(string text, string expectedQuery)
     {
         // Arrange
         var filter = FilterBuilder
@@ -99,7 +97,7 @@ public class MongoFilterVisitorTests
         var fieldDefinition = filter.Build();
 
         // Assert
-        var value = ConvertToString(fieldDefinition);
+        var value = fieldDefinition.ConvertToBsonDocument();
         value.Should().BeEquivalentTo(BsonDocument.Parse(expectedQuery));
     }
 
@@ -107,7 +105,7 @@ public class MongoFilterVisitorTests
     [TestCase("foo=bar OR temp<=100", "{ $or: [{ foo: \"bar\" }, { temp: { $lte: 100 } } ] }")]
     [TestCase("foo=bar OR foo=\"baz\" OR isDeleted=false",
         "{ $or : [ { foo : \"bar\" }, { foo : \"baz\" }, { isDeleted: false } ] }")]
-    public void ShouldHandleOrOperators(string text, string expectedQuery)
+    public void Should_handle_or_operators(string text, string expectedQuery)
     {
         // Arrange
         var filter = FilterBuilder
@@ -118,14 +116,14 @@ public class MongoFilterVisitorTests
         var fieldDefinition = filter.Build();
 
         // Assert
-        var value = ConvertToString(fieldDefinition);
+        var value = fieldDefinition.ConvertToBsonDocument();
         value.Should().BeEquivalentTo(BsonDocument.Parse(expectedQuery));
     }
 
     [TestCase("foo.bar=true", "{ \"foo.bar\": true }")]
     [TestCase("foo.bar>42", "{ \"foo.bar\": { $gt: 42 }}")]
     [TestCase("foo.bar.baz=\"foo\"", "{ \"foo.bar.baz\": \"foo\" }")]
-    public void ShouldHandleTraversalOperations(string text, string expectedQuery)
+    public void Should_handle_traversal_operations(string text, string expectedQuery)
     {
         // Arrange
         var filter = FilterBuilder
@@ -136,13 +134,13 @@ public class MongoFilterVisitorTests
         var fieldDefinition = filter.Build();
 
         // Assert
-        var value = ConvertToString(fieldDefinition);
+        var value = fieldDefinition.ConvertToBsonDocument();
         value.Should().BeEquivalentTo(BsonDocument.Parse(expectedQuery));
     }
 
     [TestCase("foo=\"bar*\"", "{ foo : { $regex: \"^bar\" } }")]
     [TestCase("foo=\"*bar\"", "{ foo : { $regex: \"bar$\" } }")]
-    public void ShouldHandleWildCardSearches(string text, string expectedQuery)
+    public void Should_handle_wildCard_searches(string text, string expectedQuery)
     {
         // Arrange
         var filter = FilterBuilder
@@ -153,14 +151,7 @@ public class MongoFilterVisitorTests
         var fieldDefinition = filter.Build();
 
         // Assert
-        var value = ConvertToString(fieldDefinition);
+        var value = fieldDefinition.ConvertToBsonDocument();
         value.Should().BeEquivalentTo(BsonDocument.Parse(expectedQuery));
-    }
-
-    private BsonDocument ConvertToString<T>(FilterDefinition<T> filterDefinition)
-    {
-        var serializer = BsonSerializer.SerializerRegistry.GetSerializer<T>();
-        var bsonDocument = filterDefinition.Render(serializer, BsonSerializer.SerializerRegistry);
-        return bsonDocument;
     }
 }
