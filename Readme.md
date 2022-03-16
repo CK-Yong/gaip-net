@@ -1,6 +1,14 @@
 ﻿# Google API Improvement Proposal (GAIP) Utilities for C#
 This project is an attempt to create a simple to use library that implements Google's API Improvement Proposals. Currently, only [AIP-160](https://google.aip.dev/160) is being implemented, but features like sorting could follow. The project is still very fresh, so no stability is guaranteed outside of what is tested in the provided unit tests.
 
+# Packages
+Currently, the following packages are available:
+
+| Package        | Prerelease                                                                                                                             |                                                                                                             
+|----------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| Gaip.Net.Core  | [![NuGet Badge](https://buildstats.info/nuget/Gaip.Net.Core?includePreReleases=true)](https://www.nuget.org/packages/Gaip.Net.Core/)   |  
+| Gaip.Net.Mongo | [![NuGet Badge](https://buildstats.info/nuget/Gaip.Net.Mongo?includePreReleases=true)](https://www.nuget.org/packages/Gaip.Net.Mongo/) |
+
 # Usage
 At the moment this tool supports the conversion of Filter strings to Mongo `FilterDefinition<T>`. For example:
 ```csharp
@@ -69,6 +77,7 @@ Implementing [AIP-160](https://google.aip.dev/160), in no specific order of impo
 - [ ] Review "HAS" operator behaviour (more tests, make sure it confirms to Google guidelines)
 - [ ] Support for functions
 - [ ] Support for `IQueryable`, so we have at least LINQ support
+- [ ] Support for [Ordering](https://google.aip.dev/132#ordering)
 
 ## See also
 [License.md](./License.md)
