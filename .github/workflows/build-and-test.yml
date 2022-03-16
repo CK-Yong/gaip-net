@@ -58,4 +58,18 @@ jobs:
     - name: Push to Nuget
       if: steps.package.outcome == 'success'
       run : |
-        docker run gaip-net/packages:latest dotnet nuget push /output/*.nupkg -k ${{ secrets.NUGET_PAT }} -s https://api.nuget.org/v3/index.json
+        docker run --name pack gaip-net/packages:latest dotnet nuget push /output/*.nupkg -k ${{ secrets.NUGET_PAT }} -s https://api.nuget.org/v3/index.json
+        
+    - name: Copy nupkg files
+      id: copy-nupkgs
+      if: steps.package.outcome == 'success'
+      run : |
+        docker cp pack:/output ${{ github.workspace }}/nupkgs
+        
+    - name: Upload nupkg files
+      if: steps.copy-nupkgs.outcome == 'success'
+      uses: actions/upload-artifact@v3
+      with:
+        name: nuget-packages
+        path: ${{ github.workspace }}/nupkgs
+      
