@@ -5,12 +5,12 @@ using Gaip.Net.Core.Contracts;
 
 namespace Gaip.Net.Core
 {
-    public class FilterVisitor : FilterBaseVisitor<object>
+    public class FilterVisitor<T> : FilterBaseVisitor<object>
     {
-        private IFilterAdapter _adapter;
-        private IFilterAdapter _filterAdapter;
+        private IFilterAdapter<T> _adapter;
+        private IFilterAdapter<T> _filterAdapter;
 
-        public FilterVisitor(IFilterAdapter adapter)
+        public FilterVisitor(IFilterAdapter<T> adapter)
         {
             _adapter = adapter;
         }
@@ -73,7 +73,7 @@ namespace Gaip.Net.Core
             };
         }
 
-        private IFilterAdapter EqualityOrSearch(object comparable, FilterParser.ArgContext arg)
+        private IFilterAdapter<T> EqualityOrSearch(object comparable, FilterParser.ArgContext arg)
         {
             var argValue = arg.comparable().member().value().STRING();
 
