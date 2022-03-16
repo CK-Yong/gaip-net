@@ -40,6 +40,10 @@ Result:
 { $and : [ { _id : "abc" }, { baz : "def" } ] }
 ```
 Check the unit tests for more examples.
+
+## Extending functionality
+At the moment, only queries that are compatible with the Mongo C# driver are supported. You are of course free to extend this library to support other databases. The easiest way to do this is to implement the `IFilterAdapter` interface. See also the [MongoFilterAdapter](./src/Gaip.Net.Mongo/MongoFilterAdapter.cs) class.
+
 # Development notes
 This project depends on Antlr4, and grammar files are specified in `src/Gaip.Net.Core/Grammar`. The easiest way to work with this is to use an Antlr4 plugin for your IDE. For example, the [Rider plugin](https://plugins.jetbrains.com/plugin/7358-antlr-v4). You can configure the plugin to export the generated Antlr classes to `src/Gaip.Net.Core/Antlr4` so they will be ignored by Git.
 
