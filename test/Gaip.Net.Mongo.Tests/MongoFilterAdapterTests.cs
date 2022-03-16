@@ -22,7 +22,7 @@ public class MongoFilterVisitorTests
         // Arrange
         var filter = FilterBuilder
             .FromString($"foo{op}123")
-            .UseAdapter(new MongoFilterAdapter());
+            .UseAdapter(new MongoFilterAdapter<object>());
 
         // Act
         var fieldDefinition = filter.Build<FilterDefinition<object>>();
@@ -54,7 +54,7 @@ public class MongoFilterVisitorTests
         // Arrange
         var filter = FilterBuilder
             .FromString($"foo={input}")
-            .UseAdapter(new MongoFilterAdapter());
+            .UseAdapter(new MongoFilterAdapter<object>());
 
         // Act
         var fieldDefinition = filter.Build<FilterDefinition<object>>();
@@ -74,7 +74,7 @@ public class MongoFilterVisitorTests
         // Arrange
         var filter = FilterBuilder
             .FromString(text)
-            .UseAdapter(new MongoFilterAdapter());
+            .UseAdapter(new MongoFilterAdapter<object>());
 
         // Act
         var fieldDefinition = filter.Build<FilterDefinition<object>>();
@@ -93,7 +93,7 @@ public class MongoFilterVisitorTests
         // Arrange
         var filter = FilterBuilder
             .FromString(text)
-            .UseAdapter(new MongoFilterAdapter());
+            .UseAdapter(new MongoFilterAdapter<object>());
 
         // Act
         var fieldDefinition = filter.Build<FilterDefinition<object>>();
@@ -112,7 +112,7 @@ public class MongoFilterVisitorTests
         // Arrange
         var filter = FilterBuilder
             .FromString(text)
-            .UseAdapter(new MongoFilterAdapter());
+            .UseAdapter(new MongoFilterAdapter<object>());
 
         // Act
         var fieldDefinition = filter.Build<FilterDefinition<object>>();
@@ -130,7 +130,7 @@ public class MongoFilterVisitorTests
         // Arrange
         var filter = FilterBuilder
             .FromString(text)
-            .UseAdapter(new MongoFilterAdapter());
+            .UseAdapter(new MongoFilterAdapter<object>());
 
         // Act
         var fieldDefinition = filter.Build<FilterDefinition<object>>();
@@ -147,7 +147,7 @@ public class MongoFilterVisitorTests
         // Arrange
         var filter = FilterBuilder
             .FromString(text)
-            .UseAdapter(new MongoFilterAdapter());
+            .UseAdapter(new MongoFilterAdapter<object>());
 
         // Act
         var fieldDefinition = filter.Build<FilterDefinition<object>>();
