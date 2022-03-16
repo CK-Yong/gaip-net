@@ -37,8 +37,8 @@ Also, in the base of the project there is a script to do this for you:
 Note: You're all free to create issues to make any suggestions, and submit PRs. I will provide a document on contributing sometime in the future... 
 
 Implementing [AIP-160](https://google.aip.dev/160), in no specific order of importance:
-- [ ] Support for strongly typed `FilterDefinition` variant of the Mongo Driver (e.g. usage of `BsonId` and other attributes)
-- [ ] Add build pipelines for build validation and distribution through nuget.org
+- [x] Support for strongly typed `FilterDefinition` variant of the Mongo Driver (e.g. usage of `BsonId` and other attributes)
+- [x] Add build pipelines for build validation and distribution through nuget.org
 - [ ] Add templates for pull requests
 - [ ] Review "HAS" operator behaviour (more tests, make sure it confirms to Google guidelines)
 - [ ] Support for functions

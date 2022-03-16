@@ -1,17 +1,13 @@
-﻿using System;
-using AutoFixture;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Gaip.Net.Core;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Driver;
-using MongoDB.Driver.Core.Events;
 using NUnit.Framework;
 
 namespace Gaip.Net.Mongo.Tests;
 
 [TestFixture]
-public class MongoFilterAdapterComponentTests
+public class StronglyTypedMongoFilterAdapterTests
 {
     [Test]
     public void Should_consider_bsonId_attributes()
