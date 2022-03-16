@@ -1,36 +1,53 @@
-﻿using Antlr4.Runtime;
+﻿using System;
+using Antlr4.Runtime;
 using Gaip.Net.Core.Contracts;
 
 namespace Gaip.Net.Core
 {
     public class FilterBuilder
     {
-        private readonly FilterParser.FilterContext _filterContext;
-        private FilterVisitor _visitor;
-        
+        private readonly string _text;
+
         private FilterBuilder(string text)
         {
-            var inputStream = new AntlrInputStream(text);
-            var lexer = new FilterLexer(inputStream);
-            var tokenStream = new CommonTokenStream(lexer);
-            _filterContext = new FilterParser(tokenStream).filter();
+            _text = text;
         }
 
         public static FilterBuilder FromString(string text)
         {
             return new FilterBuilder(text);
         }
-
-        public FilterBuilder UseAdapter(IFilterAdapter adapter)
+        
+        public FilterBuilder<T> UseAdapter<T>(IFilterAdapter<T> adapter)
         {
-            _visitor = new FilterVisitor(adapter);
-            return this;
+            return new FilterBuilder<T>(_text, adapter);
+        }
+    }
+
+    public class FilterBuilder<T>
+    {
+        private readonly FilterParser.FilterContext _filterContext;
+        private readonly FilterVisitor<T> _visitor;
+
+        internal FilterBuilder(string text, IFilterAdapter<T> adapter)
+        {
+            var inputStream = new AntlrInputStream(text);
+            var lexer = new FilterLexer(inputStream);
+            var tokenStream = new CommonTokenStream(lexer);
+            _filterContext = new FilterParser(tokenStream).filter();
+            _visitor = new FilterVisitor<T>(adapter);
         }
 
-        public T Build<T>() where T: class
+        public T Build()
         {
             var resultAdapter = _visitor.Visit(_filterContext);
-            return (resultAdapter as IFilterAdapter)?.GetResult<T>();
+
+            if (resultAdapter is not IFilterAdapter<T> adapter)
+            {
+                throw new InvalidOperationException("Adapter is not of type IFilterAdapter<T>");
+            }
+
+            return adapter.GetResult();
         }
     }
 }

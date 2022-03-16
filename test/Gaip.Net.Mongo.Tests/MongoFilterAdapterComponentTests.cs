@@ -45,9 +45,10 @@ public class MongoFilterAdapterComponentTests
         var id = Guid.NewGuid().ToString();
         _mongoCollection.InsertOne(new TestDocument { MyId = id });
 
-        var filter = FilterBuilder.FromString($"MyId=\"{id}\"")
+        var filter = FilterBuilder
+            .FromString($"MyId=\"{id}\"")
             .UseAdapter(new MongoFilterAdapter<TestDocument>())
-            .Build<FilterDefinition<TestDocument>>();
+            .Build();
         
         // Act
         var result = _mongoCollection.Find(filter).SingleOrDefault();
@@ -65,9 +66,10 @@ public class MongoFilterAdapterComponentTests
         
         _mongoCollection.InsertOne(testDocument);
 
-        var filter = FilterBuilder.FromString($"MyElement={testDocument.MyElement}")
+        var filter = FilterBuilder
+            .FromString($"MyElement={testDocument.MyElement}")
             .UseAdapter(new MongoFilterAdapter<TestDocument>())
-            .Build<FilterDefinition<TestDocument>>();
+            .Build();
         
         // Act
         var result = _mongoCollection.Find(filter).SingleOrDefault();

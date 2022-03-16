@@ -25,7 +25,7 @@ public class MongoFilterVisitorTests
             .UseAdapter(new MongoFilterAdapter<object>());
 
         // Act
-        var fieldDefinition = filter.Build<FilterDefinition<object>>();
+        var fieldDefinition = filter.Build();
 
         // Assert
         var value = ConvertToString(fieldDefinition);
@@ -57,7 +57,7 @@ public class MongoFilterVisitorTests
             .UseAdapter(new MongoFilterAdapter<object>());
 
         // Act
-        var fieldDefinition = filter.Build<FilterDefinition<object>>();
+        var fieldDefinition = filter.Build();
 
         // Assert
         var value = ConvertToString(fieldDefinition);
@@ -77,7 +77,7 @@ public class MongoFilterVisitorTests
             .UseAdapter(new MongoFilterAdapter<object>());
 
         // Act
-        var fieldDefinition = filter.Build<FilterDefinition<object>>();
+        var fieldDefinition = filter.Build();
 
         // Assert
         var value = ConvertToString(fieldDefinition);
@@ -96,7 +96,7 @@ public class MongoFilterVisitorTests
             .UseAdapter(new MongoFilterAdapter<object>());
 
         // Act
-        var fieldDefinition = filter.Build<FilterDefinition<object>>();
+        var fieldDefinition = filter.Build();
 
         // Assert
         var value = ConvertToString(fieldDefinition);
@@ -115,7 +115,7 @@ public class MongoFilterVisitorTests
             .UseAdapter(new MongoFilterAdapter<object>());
 
         // Act
-        var fieldDefinition = filter.Build<FilterDefinition<object>>();
+        var fieldDefinition = filter.Build();
 
         // Assert
         var value = ConvertToString(fieldDefinition);
@@ -133,7 +133,7 @@ public class MongoFilterVisitorTests
             .UseAdapter(new MongoFilterAdapter<object>());
 
         // Act
-        var fieldDefinition = filter.Build<FilterDefinition<object>>();
+        var fieldDefinition = filter.Build();
 
         // Assert
         var value = ConvertToString(fieldDefinition);
@@ -150,7 +150,7 @@ public class MongoFilterVisitorTests
             .UseAdapter(new MongoFilterAdapter<object>());
 
         // Act
-        var fieldDefinition = filter.Build<FilterDefinition<object>>();
+        var fieldDefinition = filter.Build();
 
         // Assert
         var value = ConvertToString(fieldDefinition);
