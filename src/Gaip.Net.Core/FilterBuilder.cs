@@ -30,7 +30,7 @@ namespace Gaip.Net.Core
         public T Build<T>() where T: class
         {
             var resultAdapter = _visitor.Visit(_filterContext);
-            return (resultAdapter! as IFilterAdapter).GetResult<T>();
+            return (resultAdapter as IFilterAdapter)?.GetResult<T>();
         }
     }
 }
