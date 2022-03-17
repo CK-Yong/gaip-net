@@ -45,16 +45,16 @@ namespace Gaip.Net.Mongo
             return new MongoFilterAdapter<TDocument>(_filterBuilder.Not((simple as MongoFilterAdapter<TDocument>)!.GetResult()));
         }
 
-        public IFilterAdapter<FilterDefinition<TDocument>> PrefixSearch(object comparable, string strValue)
+        public IFilterAdapter<FilterDefinition<TDocument>> Equality(object comparable, object arg)
         {
             FieldDefinition<TDocument, object> field = comparable.ToString();
-            return new MongoFilterAdapter<TDocument>(_filterBuilder.Regex(field, BsonRegularExpression.Create($"^{strValue.Substring(0, strValue.Length - 1)}")));
+            return new MongoFilterAdapter<TDocument>(_filterBuilder.Eq(field, arg));
         }
 
-        public IFilterAdapter<FilterDefinition<TDocument>> SuffixSearch(object comparable, string strValue)
+        public IFilterAdapter<FilterDefinition<TDocument>> NotEquals(object comparable, object arg)
         {
             FieldDefinition<TDocument, object> field = comparable.ToString();
-            return new MongoFilterAdapter<TDocument>(_filterBuilder.Regex(field, BsonRegularExpression.Create($"{strValue.Substring(1, strValue.Length - 1)}$")));
+            return new MongoFilterAdapter<TDocument>(_filterBuilder.Ne(field, arg));
         }
 
         public IFilterAdapter<FilterDefinition<TDocument>> LessThan(object comparable, object arg)
@@ -69,34 +69,34 @@ namespace Gaip.Net.Mongo
             return new MongoFilterAdapter<TDocument>(_filterBuilder.Lte(field, arg));
         }
 
-        public IFilterAdapter<FilterDefinition<TDocument>> GreaterThanEquals(object comparable, object arg)
-        {
-            FieldDefinition<TDocument, object> field = comparable.ToString();
-            return new MongoFilterAdapter<TDocument>(_filterBuilder.Gte(field, arg));
-        }
-
         public IFilterAdapter<FilterDefinition<TDocument>> GreaterThan(object comparable, object arg)
         {
             FieldDefinition<TDocument, object> field = comparable.ToString();
             return new MongoFilterAdapter<TDocument>(_filterBuilder.Gt(field, arg));
         }
 
-        public IFilterAdapter<FilterDefinition<TDocument>> NotEquals(object comparable, object arg)
+        public IFilterAdapter<FilterDefinition<TDocument>> GreaterThanEquals(object comparable, object arg)
         {
             FieldDefinition<TDocument, object> field = comparable.ToString();
-            return new MongoFilterAdapter<TDocument>(_filterBuilder.Ne(field, arg));
+            return new MongoFilterAdapter<TDocument>(_filterBuilder.Gte(field, arg));
+        }
+
+        public IFilterAdapter<FilterDefinition<TDocument>> PrefixSearch(object comparable, string strValue)
+        {
+            FieldDefinition<TDocument, object> field = comparable.ToString();
+            return new MongoFilterAdapter<TDocument>(_filterBuilder.Regex(field, BsonRegularExpression.Create($"^{strValue.Substring(0, strValue.Length - 1)}")));
+        }
+
+        public IFilterAdapter<FilterDefinition<TDocument>> SuffixSearch(object comparable, string strValue)
+        {
+            FieldDefinition<TDocument, object> field = comparable.ToString();
+            return new MongoFilterAdapter<TDocument>(_filterBuilder.Regex(field, BsonRegularExpression.Create($"{strValue.Substring(1, strValue.Length - 1)}$")));
         }
 
         public IFilterAdapter<FilterDefinition<TDocument>> Has(object comparable, object arg)
         {
             FieldDefinition<TDocument, object> field = comparable.ToString();
             return new MongoFilterAdapter<TDocument>(_filterBuilder.ElemMatch<object>(field, $"{{$eq: {arg}}}"));
-        }
-
-        public IFilterAdapter<FilterDefinition<TDocument>> Equality(object comparable, object arg)
-        {
-            FieldDefinition<TDocument, object> field = comparable.ToString();
-            return new MongoFilterAdapter<TDocument>(_filterBuilder.Eq(field, arg));
         }
 
         public FilterDefinition<TDocument> GetResult() 

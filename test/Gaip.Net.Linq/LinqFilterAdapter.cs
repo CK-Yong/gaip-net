@@ -35,14 +35,20 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
         throw new NotImplementedException();
     }
 
-    public IFilterAdapter<Func<T, bool>> PrefixSearch(object comparable, string strValue)
+    public IFilterAdapter<Func<T, bool>> Equality(object comparable, object arg)
     {
-        throw new NotImplementedException();
+        var propertyExpr = ConvertToExpression(comparable, compExpr => 
+            Expression.Equal(compExpr, Expression.Constant(arg)));
+
+        return new LinqFilterAdapter<T>(propertyExpr);
     }
 
-    public IFilterAdapter<Func<T, bool>> SuffixSearch(object comparable, string strValue)
+    public IFilterAdapter<Func<T, bool>> NotEquals(object comparable, object arg)
     {
-        throw new NotImplementedException();
+        var propertyExpr = ConvertToExpression(comparable, compExpr => 
+            Expression.NotEqual(compExpr, Expression.Constant(arg)));
+        
+        return new LinqFilterAdapter<T>(propertyExpr);
     }
 
     public IFilterAdapter<Func<T, bool>> LessThan(object comparable, object arg)
@@ -61,14 +67,6 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
         return new LinqFilterAdapter<T>(propertyExpr);
     }
 
-    public IFilterAdapter<Func<T, bool>> GreaterThanEquals(object comparable, object arg)
-    {
-        var propertyExpr = ConvertToExpression(comparable, compExpr => 
-            Expression.GreaterThanOrEqual(compExpr, Expression.Constant(arg)));
-        
-        return new LinqFilterAdapter<T>(propertyExpr);
-    }
-
     public IFilterAdapter<Func<T, bool>> GreaterThan(object comparable, object arg)
     {
         var propertyExpr = ConvertToExpression(comparable, compExpr => 
@@ -77,25 +75,28 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
         return new LinqFilterAdapter<T>(propertyExpr);
     }
 
-    public IFilterAdapter<Func<T, bool>> NotEquals(object comparable, object arg)
+    public IFilterAdapter<Func<T, bool>> GreaterThanEquals(object comparable, object arg)
     {
         var propertyExpr = ConvertToExpression(comparable, compExpr => 
-            Expression.NotEqual(compExpr, Expression.Constant(arg)));
+            Expression.GreaterThanOrEqual(compExpr, Expression.Constant(arg)));
         
         return new LinqFilterAdapter<T>(propertyExpr);
+    }
+
+    public IFilterAdapter<Func<T, bool>> PrefixSearch(object comparable, string strValue)
+    {
+        throw new NotImplementedException();
+    }
+
+
+    public IFilterAdapter<Func<T, bool>> SuffixSearch(object comparable, string strValue)
+    {
+        throw new NotImplementedException();
     }
 
     public IFilterAdapter<Func<T, bool>> Has(object comparable, object arg)
     {
         throw new NotImplementedException();
-    }
-
-    public IFilterAdapter<Func<T, bool>> Equality(object comparable, object arg)
-    {
-        var propertyExpr = ConvertToExpression(comparable, compExpr => 
-            Expression.Equal(compExpr, Expression.Constant(arg)));
-
-        return new LinqFilterAdapter<T>(propertyExpr);
     }
 
     private Expression ConvertToExpression(
