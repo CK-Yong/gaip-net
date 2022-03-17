@@ -37,7 +37,7 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
 
     public IFilterAdapter<Func<T, bool>> Equality(object comparable, object arg)
     {
-        var propertyExpr = ConvertToExpression(comparable, compExpr => 
+        var propertyExpr = ToNullSafeExpression(comparable, compExpr => 
             Expression.Equal(compExpr, Expression.Constant(arg)));
 
         return new LinqFilterAdapter<T>(propertyExpr);
@@ -45,7 +45,7 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
 
     public IFilterAdapter<Func<T, bool>> NotEquals(object comparable, object arg)
     {
-        var propertyExpr = ConvertToExpression(comparable, compExpr => 
+        var propertyExpr = ToNullSafeExpression(comparable, compExpr => 
             Expression.NotEqual(compExpr, Expression.Constant(arg)));
         
         return new LinqFilterAdapter<T>(propertyExpr);
@@ -53,7 +53,7 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
 
     public IFilterAdapter<Func<T, bool>> LessThan(object comparable, object arg)
     {
-        var propertyExpr = ConvertToExpression(comparable, compExpr => 
+        var propertyExpr = ToNullSafeExpression(comparable, compExpr => 
             Expression.LessThan(compExpr, Expression.Constant(arg)));
         
         return new LinqFilterAdapter<T>(propertyExpr);
@@ -61,7 +61,7 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
 
     public IFilterAdapter<Func<T, bool>> LessThanEquals(object comparable, object arg)
     {
-        var propertyExpr = ConvertToExpression(comparable, compExpr => 
+        var propertyExpr = ToNullSafeExpression(comparable, compExpr => 
             Expression.LessThanOrEqual(compExpr, Expression.Constant(arg)));
         
         return new LinqFilterAdapter<T>(propertyExpr);
@@ -69,7 +69,7 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
 
     public IFilterAdapter<Func<T, bool>> GreaterThan(object comparable, object arg)
     {
-        var propertyExpr = ConvertToExpression(comparable, compExpr => 
+        var propertyExpr = ToNullSafeExpression(comparable, compExpr => 
             Expression.GreaterThan(compExpr, Expression.Constant(arg)));
         
         return new LinqFilterAdapter<T>(propertyExpr);
@@ -77,7 +77,7 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
 
     public IFilterAdapter<Func<T, bool>> GreaterThanEquals(object comparable, object arg)
     {
-        var propertyExpr = ConvertToExpression(comparable, compExpr => 
+        var propertyExpr = ToNullSafeExpression(comparable, compExpr => 
             Expression.GreaterThanOrEqual(compExpr, Expression.Constant(arg)));
         
         return new LinqFilterAdapter<T>(propertyExpr);
@@ -99,9 +99,7 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
         throw new NotImplementedException();
     }
 
-    private Expression ConvertToExpression(
-        object comparables,
-        Func<Expression, Expression> func)
+    private static Expression ToNullSafeExpression(object comparables, Func<Expression, Expression> func)
     {
         var strValues = comparables.ToString().Split('.');
         
