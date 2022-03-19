@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
@@ -74,12 +75,49 @@ public class Tests
         // Assert
         data.Where(filter).Single().Id.Should().Be(1);
     }
+
+    [TestCase("Integers:42")]
+    [TestCase("Array.Integer:42")]
+    //todo: data.Where(x => x.Array.Any(y => y.Integer == 42))
+    public void Should_handle_has_operator_for_arrays(string text)
+    {
+        // Arrange
+        var data = new List<TestClass>
+        {
+            new() { Id = 1, Array = new Nested[] { new() { Integer = 42 } }, Integers = new[] { 42 } },
+            new() { Id = 2, Array = new Nested[] { new() { Integer = 66 } }, Integers = new[] { 66, 123 } },
+            new() { Id = 3, Array = new Nested[] { new() { Integer = 123 } }, Integers = Array.Empty<int>()}
+        };
+
+        // Act
+        var filter = FilterBuilder
+            .FromString(text)
+            .UseAdapter(new LinqFilterAdapter<TestClass>())
+            .Build();
+        
+        // Assert
+        data.Where(filter).Single().Id.Should().Be(1);
+    }
+    
+    [TestCase("Foo:Bar")]   // Bar must be non-default.
+    [TestCase("Foo.Bar:*")] // Same as above.
+    [TestCase("Foo.Bar:42")]
+    public void Should_handle_has_operator_for_objects(string text)
+    {
+        
+    }
+    
+    
 }
 
 public class TestClass
 {
     public int Id { get; set; }
     public Nested Foo { get; set; }
+    
+    public Nested[] Array { get; set; }
+    
+    public int[] Integers { get; set; }
 }
 
 public class Nested

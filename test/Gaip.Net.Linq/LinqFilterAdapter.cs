@@ -37,7 +37,7 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
 
     public IFilterAdapter<Func<T, bool>> Equality(object comparable, object arg)
     {
-        var propertyExpr = ToNullSafeExpression(comparable, compExpr => 
+        var propertyExpr = ToNullSafePropertyExpression(comparable, compExpr => 
             Expression.Equal(compExpr, Expression.Constant(arg)));
 
         return new LinqFilterAdapter<T>(propertyExpr);
@@ -45,7 +45,7 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
 
     public IFilterAdapter<Func<T, bool>> NotEquals(object comparable, object arg)
     {
-        var propertyExpr = ToNullSafeExpression(comparable, compExpr => 
+        var propertyExpr = ToNullSafePropertyExpression(comparable, compExpr => 
             Expression.NotEqual(compExpr, Expression.Constant(arg)));
         
         return new LinqFilterAdapter<T>(propertyExpr);
@@ -53,7 +53,7 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
 
     public IFilterAdapter<Func<T, bool>> LessThan(object comparable, object arg)
     {
-        var propertyExpr = ToNullSafeExpression(comparable, compExpr => 
+        var propertyExpr = ToNullSafePropertyExpression(comparable, compExpr => 
             Expression.LessThan(compExpr, Expression.Constant(arg)));
         
         return new LinqFilterAdapter<T>(propertyExpr);
@@ -61,7 +61,7 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
 
     public IFilterAdapter<Func<T, bool>> LessThanEquals(object comparable, object arg)
     {
-        var propertyExpr = ToNullSafeExpression(comparable, compExpr => 
+        var propertyExpr = ToNullSafePropertyExpression(comparable, compExpr => 
             Expression.LessThanOrEqual(compExpr, Expression.Constant(arg)));
         
         return new LinqFilterAdapter<T>(propertyExpr);
@@ -69,7 +69,7 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
 
     public IFilterAdapter<Func<T, bool>> GreaterThan(object comparable, object arg)
     {
-        var propertyExpr = ToNullSafeExpression(comparable, compExpr => 
+        var propertyExpr = ToNullSafePropertyExpression(comparable, compExpr => 
             Expression.GreaterThan(compExpr, Expression.Constant(arg)));
         
         return new LinqFilterAdapter<T>(propertyExpr);
@@ -77,7 +77,7 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
 
     public IFilterAdapter<Func<T, bool>> GreaterThanEquals(object comparable, object arg)
     {
-        var propertyExpr = ToNullSafeExpression(comparable, compExpr => 
+        var propertyExpr = ToNullSafePropertyExpression(comparable, compExpr => 
             Expression.GreaterThanOrEqual(compExpr, Expression.Constant(arg)));
         
         return new LinqFilterAdapter<T>(propertyExpr);
@@ -96,10 +96,66 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
 
     public IFilterAdapter<Func<T, bool>> Has(object comparable, object arg)
     {
-        throw new NotImplementedException();
+        // todo:
+        // Figure out whether the last property is an array or not.
+        // If it is an array, we're supposed to use Contains.
+        // If it is not an array, we're supposed to use Equals.
+        // Work from right to left, and every time we get a property that is an array, an Any() clause should be run.
+        
+        var propertyExpr = ToPropertyExpression(comparable);
+        var propertyType = ((propertyExpr as MemberExpression).Member as PropertyInfo).PropertyType;
+
+        Type? elementType = null;
+        if (propertyType.IsArray)
+        {
+            elementType = propertyType.GetElementType();
+        }
+        else if (propertyType.GetInterfaces().Any(x => x.IsGenericType))
+        {
+            elementType = propertyType?.GetInterfaces()
+                ?.SingleOrDefault(x => x.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                ?.GetGenericArguments()[0];
+        }
+
+        if (elementType != null)
+        {
+            return new LinqFilterAdapter<T>(
+                Expression.Call(typeof(Enumerable), "Contains", new[] { elementType }, propertyExpr,
+                    Expression.Constant(arg)));
+        }
+
+        
+        return new LinqFilterAdapter<T>();
     }
 
-    private static Expression ToNullSafeExpression(object comparables, Func<Expression, Expression> func)
+    private static Expression ToPropertyExpression(object comparables)
+    {
+        var strValues = comparables.ToString().Split('.');
+        
+        Expression expr = ItemExpr;
+
+        for(var i = 0; i < strValues.Length; i++)
+        {
+            if (PropertyIsIEnumerable(expr))
+            {
+                // Do not check for nulls on IEnumerable properties.
+                // todo: this should check for Any(), and put the rest of the evaluation in there (double arrays)
+                continue;
+            }
+            
+            expr = Expression.Property(expr, strValues[i]);
+        }
+
+        return expr;
+    }
+
+    private static bool PropertyIsIEnumerable(Expression expr)
+    {
+        var propertyType = ((expr as MemberExpression)?.Member as PropertyInfo)?.PropertyType;
+        return propertyType != null && (propertyType.IsArray || propertyType.GetInterfaces().Any(x => x.IsGenericType));
+    }
+
+    private static Expression ToNullSafePropertyExpression(object comparables, Func<Expression, Expression>? func)
     {
         var strValues = comparables.ToString().Split('.');
         
@@ -109,6 +165,12 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
 
         for(var i = 0; i < strValues.Length; i++)
         {
+            if (PropertyIsIEnumerable(expr))
+            {
+                // Do not check for nulls on IEnumerable properties.
+                continue;
+            }
+            
             expr = Expression.Property(expr, strValues[i]);
             
             // Null safety, add null-checks for all properties, except for the last traversed property.
