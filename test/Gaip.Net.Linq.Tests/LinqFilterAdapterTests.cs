@@ -76,10 +76,9 @@ public class Tests
         data.Where(filter).Single().Id.Should().Be(1);
     }
 
-    [TestCase("Integers:42")]
-    [TestCase("Array.Integer:42")]
-    //todo: data.Where(x => x.Array.Any(y => y.Integer == 42))
-    public void Should_handle_has_operator_for_arrays(string text)
+    [TestCase("Integers:42", 1)]
+    [TestCase("Array.Integer:66", 2)]
+    public void Should_handle_has_operator_for_arrays(string text, int expectedId)
     {
         // Arrange
         var data = new List<TestClass>
@@ -96,7 +95,7 @@ public class Tests
             .Build();
         
         // Assert
-        data.Where(filter).Single().Id.Should().Be(1);
+        data.Where(filter).Single().Id.Should().Be(expectedId);
     }
     
     [TestCase("Foo:Bar")]   // Bar must be non-default.

@@ -96,63 +96,71 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
 
     public IFilterAdapter<Func<T, bool>> Has(object comparable, object arg)
     {
-        // todo:
-        // Figure out whether the last property is an array or not.
-        // If it is an array, we're supposed to use Contains.
-        // If it is not an array, we're supposed to use Equals.
-        // Work from right to left, and every time we get a property that is an array, an Any() clause should be run.
-        
-        var propertyExpr = ToPropertyExpression(comparable);
-        var propertyType = ((propertyExpr as MemberExpression).Member as PropertyInfo).PropertyType;
+        var propertyStrings = comparable.ToString().Split('.');
 
-        Type? elementType = null;
-        if (propertyType.IsArray)
-        {
-            elementType = propertyType.GetElementType();
-        }
-        else if (propertyType.GetInterfaces().Any(x => x.IsGenericType))
-        {
-            elementType = propertyType?.GetInterfaces()
-                ?.SingleOrDefault(x => x.GetGenericTypeDefinition() == typeof(IEnumerable<>))
-                ?.GetGenericArguments()[0];
-        }
-
-        if (elementType != null)
-        {
-            return new LinqFilterAdapter<T>(
-                Expression.Call(typeof(Enumerable), "Contains", new[] { elementType }, propertyExpr,
-                    Expression.Constant(arg)));
-        }
-
-        
-        return new LinqFilterAdapter<T>();
+        return new LinqFilterAdapter<T>(BuildHasExpression(ItemExpr, propertyStrings, arg));
     }
 
-    private static Expression ToPropertyExpression(object comparables)
+    private static Expression BuildHasExpression(Expression buildExpression, string[] comparables, object arg)
     {
-        var strValues = comparables.ToString().Split('.');
-        
-        Expression expr = ItemExpr;
-
-        for(var i = 0; i < strValues.Length; i++)
+        PropertyInfo propertyInfo;
+        if (buildExpression is MemberExpression memberExpression)
         {
-            if (PropertyIsIEnumerable(expr))
+            propertyInfo = memberExpression.Member as PropertyInfo;
+        }
+        else
+        {
+            return BuildHasExpression(Expression.Property(buildExpression, comparables[0]), comparables[1..], arg);
+        }
+        
+        Type? elementType;
+        // Determine the type of the current Type, if it is an array or IEnumerable<T>.
+        var propType = propertyInfo.PropertyType;
+        if (TypeIsIEnumerable(propType))
+        {
+            // First determine the element-type, we need it in all cases.
+            if (propType.IsArray)
             {
-                // Do not check for nulls on IEnumerable properties.
-                // todo: this should check for Any(), and put the rest of the evaluation in there (double arrays)
-                continue;
+                elementType = propType.GetElementType();
             }
-            
-            expr = Expression.Property(expr, strValues[i]);
+            else // This is an IEnumerable, get type from generic argument.
+            {
+                elementType = propType?.GetInterfaces()
+                    ?.SingleOrDefault(x => x.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                    ?.GetGenericArguments()[0];
+            }
+
+            if (comparables.Length == 0) // This is the last one. Build and return a result.
+            {
+                var parameter = Expression.Parameter(elementType, "comparable");
+                var lambda = Expression.Lambda(Expression.Equal(parameter, Expression.Constant(arg)), parameter);
+                var anyExpression = Expression.Call(typeof(Enumerable), "Any",
+                    new[] { elementType }, buildExpression, lambda);
+                return anyExpression;
+            }
+            else
+            {
+                // Build an Any() clause with a property accessor clause.
+                var parameter = Expression.Parameter(elementType, "comparable");
+                var lambda = Expression.Lambda(BuildHasExpression(Expression.Property(parameter, comparables[0]), comparables[1..], arg), parameter);
+                var anyExpression = Expression.Call(typeof(Enumerable), "Any",
+                    new[] { elementType }, buildExpression, lambda);
+                return anyExpression;
+            }
         }
 
-        return expr;
+        return Expression.Equal(buildExpression, Expression.Constant(arg));
     }
 
     private static bool PropertyIsIEnumerable(Expression expr)
     {
         var propertyType = ((expr as MemberExpression)?.Member as PropertyInfo)?.PropertyType;
-        return propertyType != null && (propertyType.IsArray || propertyType.GetInterfaces().Any(x => x.IsGenericType));
+        return TypeIsIEnumerable(propertyType);
+    }
+
+    private static bool TypeIsIEnumerable(Type? type)
+    {
+        return type != null && (type.IsArray || type.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>)));
     }
 
     private static Expression ToNullSafePropertyExpression(object comparables, Func<Expression, Expression>? func)
