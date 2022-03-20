@@ -78,14 +78,34 @@ public class Tests
 
     [TestCase("Integers:42", 1)]
     [TestCase("Array.Integer:66", 2)]
+    [TestCase("Array.Fizz.Bar:\"hello world\"", 3)]
+    [TestCase("Array.Array.Bar:\"hello bar\"", 3)]
     public void Should_handle_has_operator_for_arrays(string text, int expectedId)
     {
         // Arrange
         var data = new List<TestClass>
         {
-            new() { Id = 1, Array = new Nested[] { new() { Integer = 42 } }, Integers = new[] { 42 } },
-            new() { Id = 2, Array = new Nested[] { new() { Integer = 66 } }, Integers = new[] { 66, 123 } },
-            new() { Id = 3, Array = new Nested[] { new() { Integer = 123 } }, Integers = Array.Empty<int>()}
+            new()
+            {
+                Id = 1, Array = new Nested[] { new() { Integer = 42, Fizz = new() } }, Integers = new[] { 42 }
+            },
+            new()
+            {
+                Id = 2, Array = new Nested[] { new() { Integer = 66, Fizz = new() } }, Integers = new[] { 66, 123 }
+            },
+            new()
+            {
+                Id = 3,
+                Array = new Nested[]
+                {
+                    new()
+                    {
+                        Integer = 123, Fizz = new() { Bar = "hello world" },
+                        Array = new[] { new Nested { Bar = "hello bar" } }
+                    }
+                },
+                Integers = Array.Empty<int>()
+            }
         };
 
         // Act
@@ -105,8 +125,6 @@ public class Tests
     {
         
     }
-    
-    
 }
 
 public class TestClass
@@ -114,9 +132,9 @@ public class TestClass
     public int Id { get; set; }
     public Nested Foo { get; set; }
     
-    public Nested[] Array { get; set; }
-    
-    public int[] Integers { get; set; }
+    public Nested[] Array { get; set; } = System.Array.Empty<Nested>();
+
+    public int[] Integers { get; set; } = System.Array.Empty<int>();
 }
 
 public class Nested
@@ -125,4 +143,5 @@ public class Nested
     public Nested Fizz { get; set; }
     public string Buzz { get; set; }
     public int Integer { get; set; }
+    public Nested[] Array { get; set; } = System.Array.Empty<Nested>();
 }

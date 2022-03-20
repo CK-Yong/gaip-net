@@ -113,7 +113,7 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
             return BuildHasExpression(Expression.Property(buildExpression, comparables[0]), comparables[1..], arg);
         }
         
-        Type? elementType;
+        Type? elementType = null;
         // Determine the type of the current Type, if it is an array or IEnumerable<T>.
         var propType = propertyInfo.PropertyType;
         if (TypeIsIEnumerable(propType))
@@ -123,15 +123,16 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
             {
                 elementType = propType.GetElementType();
             }
-            else // This is an IEnumerable, get type from generic argument.
+            else // This is an IEnumerable, get type from generic argument. 
             {
                 elementType = propType?.GetInterfaces()
                     ?.SingleOrDefault(x => x.GetGenericTypeDefinition() == typeof(IEnumerable<>))
                     ?.GetGenericArguments()[0];
             }
 
-            if (comparables.Length == 0) // This is the last one. Build and return a result.
+            if (comparables.Length == 0) 
             {
+                // This is the last one. Build and return a result.
                 var parameter = Expression.Parameter(elementType, "comparable");
                 var lambda = Expression.Lambda(Expression.Equal(parameter, Expression.Constant(arg)), parameter);
                 var anyExpression = Expression.Call(typeof(Enumerable), "Any",
@@ -149,7 +150,14 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
             }
         }
 
-        return Expression.Equal(buildExpression, Expression.Constant(arg));
+        // This is not an array or IEnumerable, and this is the last property, so we can just return an equality result.
+        if (comparables.Length == 0)
+        {
+            return Expression.Equal(buildExpression, Expression.Constant(arg));
+        }
+
+        // Needs to continue, but since it's not an IEnumerable, we can just use the property accessor.
+        return BuildHasExpression(Expression.Property(buildExpression, comparables[0]), comparables[1..], arg);
     }
 
     private static bool PropertyIsIEnumerable(Expression expr)
@@ -160,7 +168,9 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
 
     private static bool TypeIsIEnumerable(Type? type)
     {
-        return type != null && (type.IsArray || type.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>)));
+        return type != null && 
+               (type.IsArray || type.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
+               && type != typeof(string); // Make sure strings are ignored!
     }
 
     private static Expression ToNullSafePropertyExpression(object comparables, Func<Expression, Expression>? func)
