@@ -80,6 +80,7 @@ public class Tests
     [TestCase("Array.Integer:66", 2)]
     [TestCase("Array.Fizz.Bar:\"hello world\"", 3)]
     [TestCase("Array.Array.Bar:\"hello bar\"", 3)]
+    [TestCase("IntegerList:3", 3)]
     public void Should_handle_has_operator_for_arrays(string text, int expectedId)
     {
         // Arrange
@@ -104,7 +105,8 @@ public class Tests
                         Array = new[] { new Nested { Bar = "hello bar" } }
                     }
                 },
-                Integers = Array.Empty<int>()
+                Integers = Array.Empty<int>(),
+                IntegerList = new List<int>{1, 2, 3}
             }
         };
 
@@ -135,6 +137,7 @@ public class TestClass
     public Nested[] Array { get; set; } = System.Array.Empty<Nested>();
 
     public int[] Integers { get; set; } = System.Array.Empty<int>();
+    public IList<int> IntegerList { get; set; } = System.Array.Empty<int>();
 }
 
 public class Nested
@@ -143,5 +146,5 @@ public class Nested
     public Nested Fizz { get; set; }
     public string Buzz { get; set; }
     public int Integer { get; set; }
-    public Nested[] Array { get; set; } = System.Array.Empty<Nested>();
+    public IEnumerable<Nested> Array { get; set; } = System.Array.Empty<Nested>();
 }

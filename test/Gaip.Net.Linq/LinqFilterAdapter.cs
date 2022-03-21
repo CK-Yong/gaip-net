@@ -125,9 +125,7 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
             }
             else // This is an IEnumerable, get type from generic argument. 
             {
-                elementType = propType?.GetInterfaces()
-                    ?.SingleOrDefault(x => x.GetGenericTypeDefinition() == typeof(IEnumerable<>))
-                    ?.GetGenericArguments()[0];
+                elementType = propType.GetGenericArguments()[0];
             }
 
             if (comparables.Length == 0) 
@@ -168,9 +166,15 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
 
     private static bool TypeIsIEnumerable(Type? type)
     {
-        return type != null && 
-               (type.IsArray || type.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
-               && type != typeof(string); // Make sure strings are ignored!
+        return type != null &&
+               (type.IsArray
+                // Makes sure that IEnumerable<T> itself is covered by this.
+                || type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>)
+                // Makes sure that derivatives are covered (e.g. IList<T>).
+                || type.GetInterfaces()
+                    .Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
+               // Make sure strings are ignored!
+               && type != typeof(string); 
     }
 
     private static Expression ToNullSafePropertyExpression(object comparables, Func<Expression, Expression>? func)
