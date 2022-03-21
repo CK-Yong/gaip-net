@@ -187,12 +187,6 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
 
         for(var i = 0; i < strValues.Length; i++)
         {
-            if (PropertyIsIEnumerable(expr))
-            {
-                // Do not check for nulls on IEnumerable properties.
-                continue;
-            }
-            
             expr = Expression.Property(expr, strValues[i]);
             
             // Null safety, add null-checks for all properties, except for the last traversed property.
