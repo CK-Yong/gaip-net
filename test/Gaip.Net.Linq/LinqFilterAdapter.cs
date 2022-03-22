@@ -148,20 +148,24 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
             }
         }
 
+        // Only non-array and non-IEnumerable types get to this point.
         // This is not an array or IEnumerable, and this is the last property, so we can just return an equality result.
         if (comparables.Length == 0)
         {
+            if (arg is "*")
+            {
+                return Expression.NotEqual(buildExpression, Expression.Default(arg.GetType()));
+            }
+            
             return Expression.Equal(buildExpression, Expression.Constant(arg));
         }
 
+        // We need to make sure there is a null-check added before continuing traversal.
+        var nullCheck = Expression.NotEqual(buildExpression, Expression.Constant(null));
+        
         // Needs to continue, but since it's not an IEnumerable, we can just use the property accessor.
-        return BuildHasExpression(Expression.Property(buildExpression, comparables[0]), comparables[1..], arg);
-    }
-
-    private static bool PropertyIsIEnumerable(Expression expr)
-    {
-        var propertyType = ((expr as MemberExpression)?.Member as PropertyInfo)?.PropertyType;
-        return TypeIsIEnumerable(propertyType);
+        var nextExpression = BuildHasExpression(Expression.Property(buildExpression, comparables[0]), comparables[1..], arg);
+        return Expression.AndAlso(nullCheck, nextExpression);
     }
 
     private static bool TypeIsIEnumerable(Type? type)
@@ -177,20 +181,18 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
                && type != typeof(string); 
     }
 
-    private static Expression ToNullSafePropertyExpression(object comparables, Func<Expression, Expression>? func)
+    private static Expression ToNullSafePropertyExpression(string[] comparables, Func<Expression, Expression>? func)
     {
-        var strValues = comparables.ToString().Split('.');
-        
         Expression expr = ItemExpr;
 
         List<Expression> nullChecks = new List<Expression>();
 
-        for(var i = 0; i < strValues.Length; i++)
+        for(var i = 0; i < comparables.Length; i++)
         {
-            expr = Expression.Property(expr, strValues[i]);
+            expr = Expression.Property(expr, comparables[i]);
             
             // Null safety, add null-checks for all properties, except for the last traversed property.
-            if(i < strValues.Length - 1)
+            if(i < comparables.Length - 1)
             {
                 var member = (expr as MemberExpression).Member;
                 var type = (member as PropertyInfo).PropertyType;
@@ -221,6 +223,13 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
         }
         
         return Expression.AndAlso(nullCheckExpr, comparison);
+    }
+    
+    private static Expression ToNullSafePropertyExpression(object comparables, Func<Expression, Expression>? func)
+    {
+        var strValues = comparables.ToString().Split('.');
+
+        return ToNullSafePropertyExpression(strValues, func);
     }
 
     public Func<T, bool> GetResult()

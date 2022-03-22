@@ -122,10 +122,36 @@ public class Tests
     
     [TestCase("Foo:Bar")]   // Bar must be non-default.
     [TestCase("Foo.Bar:*")] // Same as above.
-    [TestCase("Foo.Bar:42")]
+    [TestCase("Foo.Integer:42")]
+    [TestCase("Foo.Bar:\"baz\"")]
+    [TestCase("Foo.Fizz.Buzz:\"baz\"")]
     public void Should_handle_has_operator_for_objects(string text)
     {
+        // Arrange
+        var data = new List<TestClass>
+        {
+            new()
+            {
+                Id = 1, Foo = new Nested { Integer = 42, Bar = "baz", Fizz = new Nested { Buzz = "baz" } }
+            },
+            new()
+            {
+                Id = 2
+            },
+            new()
+            {
+                Id = 3
+            }
+        };
+
+        // Act
+        var filter = FilterBuilder
+            .FromString(text)
+            .UseAdapter(new LinqFilterAdapter<TestClass>())
+            .Build();
         
+        // Assert
+        data.Where(filter).Single().Id.Should().Be(1);
     }
 }
 
