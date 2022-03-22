@@ -31,7 +31,7 @@ public class MongoFilterVisitorTests
     }
 
     [TestCase("\"Some String\"", "{ foo : \"Some String\" }")]
-    [TestCase("\'Some String'", "{ foo : \"Some String\" }")]
+    [TestCase("\'Some String\'", "{ foo : \"Some String\" }")]
     // Integral numbers
     [TestCase("123", "{ foo : 123 }")]
     [TestCase("1000000000000", "{ foo : NumberLong(1000000000000) }")]
@@ -62,11 +62,11 @@ public class MongoFilterVisitorTests
         value.Should().BeEquivalentTo(BsonDocument.Parse(expected));
     }
 
-    [TestCase("-foo=bar", "{ foo : { $ne : \"bar\" }}")]
-    [TestCase("NOT foo=bar", "{ foo : { $ne : \"bar\" }}")]
-    [TestCase("NOT foo>bar", "{ foo : { $not : { $gt: \"bar\" }}}")]
-    [TestCase("-foo<bar", "{ foo : { $not : { $lt: \"bar\" }}}")]
-    [TestCase("NOT foo>=bar", "{ foo : { $not : { $gte: \"bar\" }}}")]
+    [TestCase("-foo=\"bar\"", "{ foo : { $ne : \"bar\" }}")]
+    [TestCase("NOT foo=\"bar\"", "{ foo : { $ne : \"bar\" }}")]
+    [TestCase("NOT foo>25", "{ foo : { $not : { $gt: 25 }}}")]
+    [TestCase("-foo<25", "{ foo : { $not : { $lt: 25 }}}")]
+    [TestCase("NOT foo>=25", "{ foo : { $not : { $gte: 25}}}")]
     public void Should_handle_negation_operators(string text, string expectedQuery)
     {
         // Arrange
@@ -82,9 +82,9 @@ public class MongoFilterVisitorTests
         value.Should().BeEquivalentTo(BsonDocument.Parse(expectedQuery));
     }
 
-    [TestCase("foo=bar AND foo!=baz", "{ $and : [ { foo : \"bar\" }, { foo : { $ne: \"baz\" } } ] }")]
-    [TestCase("foo=bar AND temp<=100", "{ foo: \"bar\", temp: { $lte: 100 } } ")]
-    [TestCase("foo=bar AND temp<=100 AND isDeleted=false",
+    [TestCase("foo=\"bar\" AND foo!=\"baz\"", "{ $and : [ { foo : \"bar\" }, { foo : { $ne: \"baz\" } } ] }")]
+    [TestCase("foo=\"bar\" AND temp<=100", "{ foo: \"bar\", temp: { $lte: 100 } } ")]
+    [TestCase("foo=\"bar\" AND temp<=100 AND isDeleted=false",
         "{ foo: \"bar\", temp: { $lte: 100 }, isDeleted: false } ")]
     public void Should_handle_and_operators(string text, string expectedQuery)
     {
@@ -101,10 +101,9 @@ public class MongoFilterVisitorTests
         value.Should().BeEquivalentTo(BsonDocument.Parse(expectedQuery));
     }
 
-    [TestCase("foo=bar OR foo!=baz", "{ $or : [ { foo : \"bar\" }, { foo : { $ne: \"baz\" } } ] }")]
-    [TestCase("foo=bar OR temp<=100", "{ $or: [{ foo: \"bar\" }, { temp: { $lte: 100 } } ] }")]
-    [TestCase("foo=bar OR foo=\"baz\" OR isDeleted=false",
-        "{ $or : [ { foo : \"bar\" }, { foo : \"baz\" }, { isDeleted: false } ] }")]
+    [TestCase("foo=\"bar\" OR foo!=\"baz\"", "{ $or : [ { foo : \"bar\" }, { foo : { $ne: \"baz\" } } ] }")]
+    [TestCase("foo=\"bar\" OR temp<=100", "{ $or: [{ foo: \"bar\" }, { temp: { $lte: 100 } } ] }")]
+    [TestCase("foo=\"bar\" OR foo=\"baz\" OR isDeleted=false", "{ $or : [ { foo : \"bar\" }, { foo : \"baz\" }, { isDeleted: false } ] }")]
     public void Should_handle_or_operators(string text, string expectedQuery)
     {
         // Arrange
