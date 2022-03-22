@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
+using Gaip.Net.Core;
 using Gaip.Net.Core.Contracts;
 
 namespace Gaip.Net.Linq;
@@ -37,16 +38,28 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
 
     public IFilterAdapter<Func<T, bool>> Equality(object comparable, object arg)
     {
+        var val = arg;
+        if (arg is StringLiteralValue stringLiteral)
+        {
+            val = stringLiteral.Value;
+        }
+        
         var propertyExpr = ToNullSafePropertyExpression(comparable, compExpr => 
-            Expression.Equal(compExpr, Expression.Constant(arg)));
+            Expression.Equal(compExpr, Expression.Constant(val)));
 
         return new LinqFilterAdapter<T>(propertyExpr);
     }
 
     public IFilterAdapter<Func<T, bool>> NotEquals(object comparable, object arg)
     {
+        var val = arg;
+        if (arg is StringLiteralValue stringLiteral)
+        {
+            val = stringLiteral.Value;
+        }
+        
         var propertyExpr = ToNullSafePropertyExpression(comparable, compExpr => 
-            Expression.NotEqual(compExpr, Expression.Constant(arg)));
+            Expression.NotEqual(compExpr, Expression.Constant(val)));
         
         return new LinqFilterAdapter<T>(propertyExpr);
     }
@@ -96,9 +109,15 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
 
     public IFilterAdapter<Func<T, bool>> Has(object comparable, object arg)
     {
+        var val = arg;
+        if (arg is StringLiteralValue stringLiteral)
+        {
+            val = stringLiteral.Value;
+        }
+        
         var propertyStrings = comparable.ToString().Split('.');
 
-        return new LinqFilterAdapter<T>(BuildHasExpression(ItemExpr, propertyStrings, arg));
+        return new LinqFilterAdapter<T>(BuildHasExpression(ItemExpr, propertyStrings, val));
     }
 
     private static Expression BuildHasExpression(Expression buildExpression, string[] comparables, object arg)

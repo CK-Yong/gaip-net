@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Gaip.Net.Core;
 using Gaip.Net.Core.Contracts;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -47,14 +48,26 @@ namespace Gaip.Net.Mongo
 
         public IFilterAdapter<FilterDefinition<TDocument>> Equality(object comparable, object arg)
         {
+            var val = arg;
+            if (arg is StringLiteralValue stringLiteral)
+            {
+                val = stringLiteral.Value;
+            }
+            
             FieldDefinition<TDocument, object> field = comparable.ToString();
-            return new MongoFilterAdapter<TDocument>(_filterBuilder.Eq(field, arg));
+            return new MongoFilterAdapter<TDocument>(_filterBuilder.Eq(field, val));
         }
 
         public IFilterAdapter<FilterDefinition<TDocument>> NotEquals(object comparable, object arg)
         {
+            var val = arg;
+            if (arg is StringLiteralValue stringLiteral)
+            {
+                val = stringLiteral.Value;
+            }
+            
             FieldDefinition<TDocument, object> field = comparable.ToString();
-            return new MongoFilterAdapter<TDocument>(_filterBuilder.Ne(field, arg));
+            return new MongoFilterAdapter<TDocument>(_filterBuilder.Ne(field, val));
         }
 
         public IFilterAdapter<FilterDefinition<TDocument>> LessThan(object comparable, object arg)

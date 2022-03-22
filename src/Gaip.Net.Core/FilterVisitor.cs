@@ -7,8 +7,7 @@ namespace Gaip.Net.Core
 {
     public class FilterVisitor<T> : FilterBaseVisitor<object>
     {
-        private IFilterAdapter<T> _adapter;
-        private IFilterAdapter<T> _filterAdapter;
+        private readonly IFilterAdapter<T> _adapter;
 
         public FilterVisitor(IFilterAdapter<T> adapter)
         {
@@ -135,7 +134,7 @@ namespace Gaip.Net.Core
 
             if (context.ASTERISK() != null)
             {
-                return context.ASTERISK().GetText();
+                return new SoloWildCardValue();
             }
 
             if (context.DATETIME() != null)
@@ -145,12 +144,12 @@ namespace Gaip.Net.Core
 
             if (context.STRING() != null)
             {
-                return context.STRING().GetText().Trim('\"', '\'');
+                return new StringLiteralValue(context.STRING().GetText() );
             }
 
             if (context.TEXT() != null)
             {
-                return context.TEXT().GetText();
+                return new TextValue(context.TEXT().GetText());
             }
 
             return base.VisitValue(context);
@@ -159,6 +158,47 @@ namespace Gaip.Net.Core
         protected override object AggregateResult(object aggregate, object nextResult)
         {
             return aggregate ?? nextResult;
+        }
+    }
+
+    // Represents a value that is a wildcard (literal asterisk as a value)
+    public sealed class SoloWildCardValue
+    {
+    }
+
+    /// <summary>
+    /// Represents a value that is a string literal. This is used when the value was surrounded by quotes. 
+    /// </summary>
+    public sealed class StringLiteralValue
+    {
+        public StringLiteralValue(string value)
+        {
+            Value = value.Trim('\"', '\'');
+        }
+
+        public string Value { get; }
+        
+        public override string ToString()
+        {
+            return Value;
+        }
+    }
+
+    /// <summary>
+    /// Represents a raw text value. This is used when the value was not surrounded by quotes. 
+    /// </summary>
+    public sealed class TextValue
+    {
+        internal TextValue(string value)
+        {
+            Value = value;
+        }
+
+        public string Value { get; }
+        
+        public override string ToString()
+        {
+            return Value;
         }
     }
 }
