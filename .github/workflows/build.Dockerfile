@@ -42,3 +42,7 @@ ENV VERSION=$Version
 RUN dotnet pack ./src/Gaip.Net.Core/Gaip.Net.Core.csproj --no-build --output /output -p:Version="$VERSION"
 RUN dotnet pack ./src/Gaip.Net.Mongo/Gaip.Net.Mongo.csproj --no-build --output /output -p:Version="$VERSION"
 RUN dotnet pack ./src/Gaip.Net.Linq/Gaip.Net.Linq.csproj --no-build --output /output -p:Version="$VERSION"
+
+# Build stage for exporting locally. Not used in build pipelines for now.
+FROM scratch AS export-packages
+COPY --from=dotnet-pack /output .

@@ -3,3 +3,5 @@
 .idea
 *.DotSettings.user
 output
+build_packages.sh
+build_grammar.sh
