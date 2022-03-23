@@ -1,10 +1,30 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
+    <PropertyGroup>
+        <Authors>ckyong</Authors>
+        <PackageLicenseFile>License.md</PackageLicenseFile>
+        <PackageReadmeFile>Readme.md</PackageReadmeFile>
+        <ProjectUrl>https://github.com/CK-Yong/gaip-net</ProjectUrl>
+        <RepositoryUrl>https://github.com/CK-Yong/gaip-net</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <RequireLicenseAcceptance>false</RequireLicenseAcceptance>
+        <Summary>
+            Gaip.Net is a class library that simplifies the implementation of Google API Improvement Proposals for .NET.
+        </Summary>
+        <Language>en-US</Language>
+        <Tags>google aip api improvement proposals filtering sorting query search</Tags>
+        <Copyright>Copyright (c) Chee Kent Yong and Contributors. MIT License.</Copyright>
+    </PropertyGroup>
+    
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="../../License.md" Pack="true" PackagePath="" />
+        <None Include="../../Readme.md" Pack="true" PackagePath="" />
+    </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\Gaip.Net.Core\Gaip.Net.Core.csproj" />
