@@ -17,7 +17,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\Gaip.Net.Core\Gaip.Net.Core.csproj" />
-      <ProjectReference Include="..\Gaip.Net.Linq\Gaip.Net.Linq.csproj" />
+      <ProjectReference Include="..\..\src\Gaip.Net.Linq\Gaip.Net.Linq.csproj" />
     </ItemGroup>
 
 </Project>

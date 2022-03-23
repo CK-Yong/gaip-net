@@ -41,3 +41,4 @@ ENV VERSION=$Version
 
 RUN dotnet pack ./src/Gaip.Net.Core/Gaip.Net.Core.csproj --no-build --output /output -p:Version="$VERSION"
 RUN dotnet pack ./src/Gaip.Net.Mongo/Gaip.Net.Mongo.csproj --no-build --output /output -p:Version="$VERSION"
+RUN dotnet pack ./src/Gaip.Net.Linq/Gaip.Net.Linq.csproj --no-build --output /output -p:Version="$VERSION"

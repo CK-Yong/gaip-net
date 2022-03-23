@@ -10,7 +10,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gaip.Net.Core", "src\Gaip.N
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gaip.Net.Mongo", "src\Gaip.Net.Mongo\Gaip.Net.Mongo.csproj", "{33474BBF-B379-431E-811C-7A2E90FF91FE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gaip.Net.Linq", "test\Gaip.Net.Linq\Gaip.Net.Linq.csproj", "{2D36262B-4333-4744-88A5-5563FB84C830}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gaip.Net.Linq", "src\Gaip.Net.Linq\Gaip.Net.Linq.csproj", "{2D36262B-4333-4744-88A5-5563FB84C830}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gaip.Net.Linq.Tests", "test\Gaip.Net.Linq.Tests\Gaip.Net.Linq.Tests.csproj", "{3C7FFBB9-9E6D-48DD-B631-E9DE883CC3D8}"
 EndProject
