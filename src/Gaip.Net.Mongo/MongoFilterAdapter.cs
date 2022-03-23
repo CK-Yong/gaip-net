@@ -25,25 +25,23 @@ namespace Gaip.Net.Mongo
             _filter = filter;
         }
         
-        public IFilterAdapter<FilterDefinition<TDocument>> And(List<object> list)
+        public IFilterAdapter<FilterDefinition<TDocument>> And(List<IFilterAdapter<FilterDefinition<TDocument>>> list)
         {
             var expressions = list
-                .Cast<IFilterAdapter<FilterDefinition<TDocument>>>()
                 .Select(x => x.GetResult());
             return new MongoFilterAdapter<TDocument>(_filterBuilder.And(expressions));
         }
 
-        public IFilterAdapter<FilterDefinition<TDocument>> Or(List<object> list)
+        public IFilterAdapter<FilterDefinition<TDocument>> Or(List<IFilterAdapter<FilterDefinition<TDocument>>> list)
         {
             var expressions = list
-                .Cast<IFilterAdapter<FilterDefinition<TDocument>>>()
                 .Select(x => x.GetResult());
             return new MongoFilterAdapter<TDocument>(_filterBuilder.Or(expressions));
         }
 
-        public IFilterAdapter<FilterDefinition<TDocument>> Not(object simple)
+        public IFilterAdapter<FilterDefinition<TDocument>> Not(IFilterAdapter<FilterDefinition<TDocument>> simple)
         {
-            return new MongoFilterAdapter<TDocument>(_filterBuilder.Not((simple as MongoFilterAdapter<TDocument>)!.GetResult()));
+            return new MongoFilterAdapter<TDocument>(_filterBuilder.Not(simple.GetResult()));
         }
 
         public IFilterAdapter<FilterDefinition<TDocument>> Equality(object comparable, object arg)

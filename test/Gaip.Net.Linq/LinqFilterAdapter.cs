@@ -21,19 +21,38 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
         _expression = expression;
     }
 
-    public IFilterAdapter<Func<T, bool>> And(List<object> list)
+    public IFilterAdapter<Func<T, bool>> And(List<IFilterAdapter<Func<T, bool>>> list)
     {
-        throw new NotImplementedException();
+        return new LinqFilterAdapter<T>(
+            list
+                .Select(x => ((LinqFilterAdapter<T>)x)._expression)
+                .Aggregate(Expression.AndAlso));
     }
 
-    public IFilterAdapter<Func<T, bool>> Or(List<object> list)
+    public IFilterAdapter<Func<T, bool>> Or(List<IFilterAdapter<Func<T, bool>>> list)
     {
-        throw new NotImplementedException();
+        return new LinqFilterAdapter<T>(
+            list
+                .Select(x => ((LinqFilterAdapter<T>)x)._expression)
+                .Aggregate(Expression.OrElse));
     }
 
-    public IFilterAdapter<Func<T, bool>> Not(object simple)
+    public IFilterAdapter<Func<T, bool>> Not(IFilterAdapter<Func<T,bool>> simple)
     {
-        throw new NotImplementedException();
+        var binaryExpr = ((LinqFilterAdapter<T>)simple)._expression as BinaryExpression;
+
+        Expression result;
+        if (binaryExpr.Right is not ConstantExpression)
+        {
+            var rightNegated = Expression.Not(binaryExpr.Right);
+            result = Expression.MakeBinary(binaryExpr.NodeType, binaryExpr.Left, rightNegated);
+        }
+        else
+        {
+            result = Expression.Not(binaryExpr);
+        }
+    
+        return new LinqFilterAdapter<T>(result);
     }
 
     public IFilterAdapter<Func<T, bool>> Equality(object comparable, object arg)
@@ -183,9 +202,9 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
                 // We need to check for null, then add a non-default check.
                 var propertyExpr = Expression.Property(buildExpression, text.Value);
                 var info = propertyExpr.Member as PropertyInfo;
-                var checkForNull = Expression.NotEqual(buildExpression, Expression.Constant(null));
-                var evaluateNotDefault = Expression.NotEqual(propertyExpr, Expression.Default(info!.PropertyType));
-                return Expression.AndAlso(checkForNull, evaluateNotDefault);
+                var checkDefault = Expression.NotEqual(buildExpression, Expression.Default(propType));
+                var evaluateNotDefault = Expression.NotEqual(propertyExpr, Expression.Default(info.PropertyType));
+                return Expression.AndAlso(checkDefault, evaluateNotDefault);
             }
             
             // The argument is a literal value, just use equality in this case.
@@ -193,7 +212,7 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
         }
 
         // We need to make sure there is a null-check added before continuing traversal.
-        var nullCheck = Expression.NotEqual(buildExpression, Expression.Constant(null));
+        var nullCheck = Expression.NotEqual(buildExpression, Expression.Default(propType));
         
         // Needs to continue, but since it's not an IEnumerable, we can just use the property accessor.
         var nextExpression = BuildHasExpression(Expression.Property(buildExpression, comparables[0]), comparables[1..], arg);
@@ -231,7 +250,7 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
             
                 if (!type.IsValueType)
                 {
-                    nullChecks.Add(Expression.NotEqual(expr, Expression.Constant(null, type)));
+                    nullChecks.Add(Expression.NotEqual(expr, Expression.Default(type)));
                 }
             }
         }

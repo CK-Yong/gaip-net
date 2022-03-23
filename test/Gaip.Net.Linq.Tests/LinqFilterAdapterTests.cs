@@ -153,6 +153,104 @@ public class Tests
         // Assert
         data.Where(filter).Single().Id.Should().Be(1);
     }
+
+    [TestCase("Foo.Bar=\"baz\" AND Fizz=\"buzz\"", new []{1,2})]
+    [TestCase("Fizz=\"buzz\" AND Foo.Integer>=42", new []{1})]
+    [TestCase("Fizz=\"buzz\" AND Foo.Integer>=42 AND Foo.Fizz.Buzz=\"baz\"", new []{1})]
+    public void Should_handle_and_operators(string text, int[] expectedIds)
+    {
+        // Arrange
+        var data = new List<TestClass>
+        {
+            new()
+            {
+                Id = 1, Foo = new Nested { Integer = 42, Bar = "baz", Fizz = new Nested { Buzz = "baz" } }, Fizz = "buzz"
+            },
+            new()
+            {
+                Id = 2, Foo = new Nested { Bar = "baz" }, Fizz = "buzz"
+            },
+            new()
+            {
+                Id = 3
+            }
+        };
+        
+        // Act
+        var filter = FilterBuilder
+            .FromString(text)
+            .UseAdapter(new LinqFilterAdapter<TestClass>())
+            .Build();
+        
+        // Assert
+        data.Where(filter).Select(x => x.Id).Should().BeEquivalentTo(expectedIds);
+    }
+    
+    [TestCase("Foo.Bar=\"baz\" OR Fizz=\"buzz\"", new []{1,2})]
+    [TestCase("Fizz=\"buzz\" OR Foo.Integer>=42", new []{1,2})]
+    [TestCase("Fizz=\"buzz\" OR Foo.Integer>=42 OR Foo.Fizz.Buzz=\"baz\"", new []{1,2,3})]
+    public void Should_handle_or_operators(string text, int[] expectedIds)
+    {
+        // Arrange
+        var data = new List<TestClass>
+        {
+            new()
+            {
+                Id = 1, Foo = new Nested { Integer = 42, Bar = "baz", Fizz = new Nested { Buzz = "baz" } }
+            },
+            new()
+            {
+                Id = 2, Fizz = "buzz"
+            },
+            new()
+            {
+                Id = 3, Foo = new Nested { Fizz = new Nested { Buzz = "baz" } } 
+            }
+        };
+        
+        // Act
+        var filter = FilterBuilder
+            .FromString(text)
+            .UseAdapter(new LinqFilterAdapter<TestClass>())
+            .Build();
+        
+        // Assert
+        data.Where(filter).Select(x => x.Id).Should().BeEquivalentTo(expectedIds);
+    }   
+    
+    [TestCase("-Fizz=\"baz\"", new []{2, 3} )]
+    [TestCase("NOT Fizz=\"baz\"", new []{2, 3})]
+    [TestCase("NOT Foo.Integer>25", new []{3})]
+    [TestCase("-Foo.Integer<25", new []{1})]
+    [TestCase("NOT Foo.Integer>=42", new []{3})]
+    public void Should_handle_negation_operators(string text, int[] expectedIds)
+    {
+        // Arrange
+        var data = new List<TestClass>
+        {
+            new()
+            {
+                Id = 1, Foo = new Nested { Integer = 42, Bar = "baz", Fizz = new Nested { Buzz = "baz" } }, Fizz = "baz"
+            },
+            new()
+            {
+                Id = 2, Fizz = "buzz"
+            },
+            new()
+            {
+                Id = 3, Foo = new Nested { Bar = "not-baz", Fizz = new Nested { Buzz = "baz" } } 
+            }
+        };
+        
+        // Act
+        var filter = FilterBuilder
+            .FromString(text)
+            .UseAdapter(new LinqFilterAdapter<TestClass>())
+            .Build();
+        
+        // Assert
+        data.Where(filter).Select(x => x.Id).Should().BeEquivalentTo(expectedIds);
+    }
 }
 
 public class TestClass
@@ -164,6 +262,7 @@ public class TestClass
 
     public int[] Integers { get; set; } = System.Array.Empty<int>();
     public IList<int> IntegerList { get; set; } = System.Array.Empty<int>();
+    public string Fizz { get; set; }
 }
 
 public class Nested

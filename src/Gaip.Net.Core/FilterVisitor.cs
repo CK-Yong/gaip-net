@@ -20,6 +20,7 @@ namespace Gaip.Net.Core
             {
                 var list = context.sequence()
                     .Select(VisitSequence)
+                    .Cast<IFilterAdapter<T>>()
                     .ToList();
 
                return _adapter.And(list);
@@ -33,6 +34,7 @@ namespace Gaip.Net.Core
             {
                 var list = context.term()
                     .Select(VisitTerm)
+                    .Cast<IFilterAdapter<T>>()
                     .ToList();
 
                 return _adapter.Or(list);
@@ -47,7 +49,7 @@ namespace Gaip.Net.Core
             {
                 var simple = VisitSimple(context.simple());
 
-               return _adapter.Not(simple);
+               return _adapter.Not((IFilterAdapter<T>) simple);
             }
 
             return base.VisitTerm(context);

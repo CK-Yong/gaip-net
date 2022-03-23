@@ -4,9 +4,9 @@ namespace Gaip.Net.Core.Contracts
 {
     public interface IFilterAdapter<TResult>
     {
-        IFilterAdapter<TResult> And(List<object> list);
-        IFilterAdapter<TResult> Or(List<object> list);
-        IFilterAdapter<TResult> Not(object simple);
+        IFilterAdapter<TResult> And(List<IFilterAdapter<TResult>> list);
+        IFilterAdapter<TResult> Or(List<IFilterAdapter<TResult>> list);
+        IFilterAdapter<TResult> Not(IFilterAdapter<TResult> simple);
         IFilterAdapter<TResult> Equality(object comparable, object arg);
         IFilterAdapter<TResult> NotEquals(object comparable, object arg);
         IFilterAdapter<TResult> LessThan(object comparable, object arg);
