@@ -171,11 +171,24 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
         // This is not an array or IEnumerable, and this is the last property, so we can just return an equality result.
         if (comparables.Length == 0)
         {
-            if (arg is "*")
+            if (arg is SoloWildCardValue)
             {
-                return Expression.NotEqual(buildExpression, Expression.Default(arg.GetType()));
+                // A wildcard by itself indicates that the property is not default.
+                return Expression.NotEqual(buildExpression, Expression.Default(propType));
+            }
+
+            if (arg is TextValue text)
+            {
+                // A TextValue means that a property is being checked for non-default.
+                // We need to check for null, then add a non-default check.
+                var propertyExpr = Expression.Property(buildExpression, text.Value);
+                var info = propertyExpr.Member as PropertyInfo;
+                var checkForNull = Expression.NotEqual(buildExpression, Expression.Constant(null));
+                var evaluateNotDefault = Expression.NotEqual(propertyExpr, Expression.Default(info!.PropertyType));
+                return Expression.AndAlso(checkForNull, evaluateNotDefault);
             }
             
+            // The argument is a literal value, just use equality in this case.
             return Expression.Equal(buildExpression, Expression.Constant(arg));
         }
 
