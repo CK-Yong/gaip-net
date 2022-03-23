@@ -127,7 +127,13 @@ public class LinqFilterAdapter<T> : IFilterAdapter<Func<T, bool>>
 
     public IFilterAdapter<Func<T, bool>> SuffixSearch(object comparable, string strValue)
     {
-        throw new NotImplementedException();
+        var propertyExpr = ToNullSafePropertyExpression(comparable, compExpr =>
+            Expression.AndAlso(
+                Expression.NotEqual(compExpr, Expression.Default(typeof(string))),
+                Expression.Call(compExpr, "EndsWith",null, Expression.Constant(strValue)))
+        );
+        
+        return new LinqFilterAdapter<T>(propertyExpr);
     }
 
     public IFilterAdapter<Func<T, bool>> Has(object comparable, object arg)
