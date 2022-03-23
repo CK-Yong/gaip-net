@@ -250,6 +250,38 @@ public class Tests
         
         // Assert
         data.Where(filter).Select(x => x.Id).Should().BeEquivalentTo(expectedIds);
+    }    
+    
+    [TestCase("Fizz=\"baz*\"", new []{1} )]
+    [TestCase("Foo.Bar=\"baz*\"", new []{1})]
+    [TestCase("Foo.Fizz.Buzz=\"baz*\"", new []{1, 3})]
+    public void Should_handle_prefix_search(string text, int[] expectedIds)
+    {
+        // Arrange
+        var data = new List<TestClass>
+        {
+            new()
+            {
+                Id = 1, Foo = new Nested { Bar = "baz", Fizz = new Nested { Buzz = "bazinga" } }, Fizz = "bazzilian"
+            },
+            new()
+            {
+                Id = 2, Fizz = "buzz"
+            },
+            new()
+            {
+                Id = 3, Foo = new Nested { Bar = "not-baz", Fizz = new Nested { Buzz = "bazedGod" } } 
+            }
+        };
+        
+        // Act
+        var filter = FilterBuilder
+            .FromString(text)
+            .UseAdapter(new LinqFilterAdapter<TestClass>())
+            .Build();
+        
+        // Assert
+        data.Where(filter).Select(x => x.Id).Should().BeEquivalentTo(expectedIds);
     }
 }
 

@@ -84,12 +84,12 @@ namespace Gaip.Net.Core
 
                 if (strValue.EndsWith('*'))
                 {
-                    return _adapter.PrefixSearch(comparable, strValue);
+                    return _adapter.PrefixSearch(comparable, strValue.TrimEnd('*'));
                 }
 
                 if (strValue.StartsWith('*'))
                 {
-                    return _adapter.SuffixSearch(comparable, strValue);
+                    return _adapter.SuffixSearch(comparable, strValue.TrimStart('*'));
                 }
             }
 

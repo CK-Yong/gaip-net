@@ -95,13 +95,13 @@ namespace Gaip.Net.Mongo
         public IFilterAdapter<FilterDefinition<TDocument>> PrefixSearch(object comparable, string strValue)
         {
             FieldDefinition<TDocument, object> field = comparable.ToString();
-            return new MongoFilterAdapter<TDocument>(_filterBuilder.Regex(field, BsonRegularExpression.Create($"^{strValue.Substring(0, strValue.Length - 1)}")));
+            return new MongoFilterAdapter<TDocument>(_filterBuilder.Regex(field, BsonRegularExpression.Create($"^{strValue}")));
         }
 
         public IFilterAdapter<FilterDefinition<TDocument>> SuffixSearch(object comparable, string strValue)
         {
             FieldDefinition<TDocument, object> field = comparable.ToString();
-            return new MongoFilterAdapter<TDocument>(_filterBuilder.Regex(field, BsonRegularExpression.Create($"{strValue.Substring(1, strValue.Length - 1)}$")));
+            return new MongoFilterAdapter<TDocument>(_filterBuilder.Regex(field, BsonRegularExpression.Create($"{strValue}$")));
         }
 
         public IFilterAdapter<FilterDefinition<TDocument>> Has(object comparable, object arg)
