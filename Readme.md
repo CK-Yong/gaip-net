@@ -91,5 +91,5 @@ Also, in the base of the project there is a script to do this for you:
 [License.md](./License.md)
 
 ## Other Notes
-You can find the grammar files in GoogleApiDesign.ApiUtilities.Grammar.
-You should configure your ANTLR config to put files in src/GoogleApiDesign.ApiUtilities. I put it in the Antlr4 directory for convenience.
+You can find the grammar files in `src/Gaip.Net.Core/Grammar`.
+You should configure your ANTLR config to put files in `src/Gaip.Net.Core/...`. I put it in a `src/Gaip.Net.Core/Antlr4` directory for convenience.
