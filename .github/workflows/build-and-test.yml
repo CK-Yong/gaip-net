@@ -58,7 +58,7 @@ jobs:
     
     - uses: docker/build-push-action@v2.9.0
       name: Prepare pre-release packages
-      if: ${{ github.ref }} != 'refs/heads/main'
+      if: github.ref != 'refs/heads/main'
       with:
         file: .github/workflows/build.Dockerfile
         target: export-packages
@@ -67,7 +67,7 @@ jobs:
         
     - uses: docker/build-push-action@v2.9.0
       name: Prepare packages
-      if: ${{ github.ref }} == 'refs/heads/main'
+      if: github.ref == 'refs/heads/main'
       with:
         file: .github/workflows/build.Dockerfile
         target: export-packages
