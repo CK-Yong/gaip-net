@@ -35,6 +35,9 @@ RUN dotnet build --no-restore
 FROM dotnet-build AS dotnet-test
 RUN dotnet test --no-build --verbosity normal --logger trx --results-directory /work/testresults
 
+FROM scratch AS export-testresults
+COPY --from=dotnet-test /work/testresults /testresults
+
 FROM dotnet-build AS dotnet-pack
 ARG Version
 ENV VERSION=$Version
