@@ -45,7 +45,7 @@ jobs:
       
     # Build and push packages           
     - name: Install Git Version
-      uses: GitTools/actions@v0.9.13
+      uses: GitTools/actions@v0.9
       with:
         versionSpec: '6.x'
     
@@ -56,7 +56,7 @@ jobs:
         
     - name: Determine Version
       id:   gitversion
-      uses: gittools/actions/gitversion/execute@v0.9.7
+      uses: gittools/actions/gitversion/execute@v0.9
     
     - run: |
         echo ${{ steps.gitversion.outputs.nuGetPreReleaseTagV2 }}
