@@ -66,17 +66,23 @@ jobs:
         target: export-packages
         build-args: Version=${{ steps.gitversion.outputs.nuGetVersionV2 }} 
         outputs: type=local,dest=${{ github.workspace }}
-    
-    # Only push on actual builds, not on PRs
-    - name: Push to Nuget
-      if: steps.package.outcome == 'success' && github.event_name != 'pull_request'
-      run: |
-        dotnet nuget push ${{ github.workspace }}/nupkgs/*.nupkg -k ${{ secrets.NUGET_PAT }} -s https://api.nuget.org/v3/index.json
-        
+
     - name: Upload nupkg files
       if: steps.package.outcome == 'success'
       uses: actions/upload-artifact@v3
       with:
         name: nuget-packages
         path: ${{ github.workspace }}/nupkgs
-      
+
+      # Only push on actual builds, not on PRs
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v1
+      if: steps.package.outcome == 'success' && github.event_name != 'pull_request'
+      with:
+        dotnet-version: |
+          6.0.x
+
+    - name: Push to Nuget
+      if: steps.package.outcome == 'success' && github.event_name != 'pull_request'
+      run: |
+        dotnet nuget push ${{ github.workspace }}/nupkgs/*.nupkg -k ${{ secrets.NUGET_PAT }} -s https://api.nuget.org/v3/index.json
