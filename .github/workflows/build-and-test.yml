@@ -46,34 +46,31 @@ jobs:
     # Build and push packages           
     - name: Install GitVersion
       uses: gittools/actions/gitversion/setup@v0.9.13
-      if: github.event_name != 'pull_request'
       with:
         versionSpec: '5.x'
     
     - name: Checkout for version calculation
       uses: actions/checkout@v2
-      if: github.event_name != 'pull_request'
       with:
         fetch-depth: 0
         
     - name: Determine Version
       id:   gitversion
       uses: gittools/actions/gitversion/execute@v0.9.13
-      if: github.event_name != 'pull_request'
     
     - uses: docker/build-push-action@v2.9.0
       id: package
       name: Prepare packages
-      if: github.event_name != 'pull_request'
       with:
         file: .github/workflows/build.Dockerfile
         tags: gaip-net/packages:latest
         target: dotnet-pack
         build-args: Version=${{ steps.gitversion.outputs.nuGetVersionV2 }} 
         load: true
-      
+    
+    # Only push on actual builds, not on PRs
     - name: Push to Nuget
-      if: steps.package.outcome == 'success'
+      if: steps.package.outcome == 'success' && github.event_name != 'pull_request'
       run : |
         docker run --name pack gaip-net/packages:latest dotnet nuget push /output/*.nupkg -k ${{ secrets.NUGET_PAT }} -s https://api.nuget.org/v3/index.json
         
