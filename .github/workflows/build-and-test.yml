@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0 # Used later for calculating GitVersion
 
     - name: Docker Setup Buildx
       uses: docker/setup-buildx-action@v1.6.0
@@ -48,11 +50,6 @@ jobs:
       uses: gittools/actions/gitversion/setup@v0.9.13
       with:
         versionSpec: '5.x'
-    
-    - name: Checkout for version calculation
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
         
     - name: Determine Version
       id:   gitversion
