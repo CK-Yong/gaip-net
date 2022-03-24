@@ -69,7 +69,7 @@ jobs:
         file: .github/workflows/build.Dockerfile
         tags: gaip-net/packages:latest
         target: dotnet-pack
-        build-args: Version=${{ steps.gitversion.outputs.nuGetPreReleaseTagV2 }} 
+        build-args: Version=${{ steps.gitversion.outputs.nuGetVersionV2 }} 
         load: true
       
     - name: Push to Nuget
