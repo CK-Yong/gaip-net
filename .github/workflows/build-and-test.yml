@@ -66,12 +66,12 @@ jobs:
         tags: gaip-net/packages:latest
         target: export-packages
         build-args: Version=${{ steps.gitversion.outputs.nuGetVersionV2 }} 
-        output: ${{ github.workspace }}/nupkgs
+        output: type=local,dest=${{ github.workspace }}/nupkgs
     
     # Only push on actual builds, not on PRs
     - name: Push to Nuget
       if: steps.package.outcome == 'success' && github.event_name != 'pull_request'
-      run : |
+      run: |
         dotnet nuget push /output/*.nupkg -k ${{ secrets.NUGET_PAT }} -s https://api.nuget.org/v3/index.json
         
     - name: Upload nupkg files
