@@ -26,18 +26,12 @@ jobs:
         target: dotnet-build
         tags: gaip-net/build:latest
     
-    - name: Run tests
+    - name: Run and export tests
       uses: docker/build-push-action@v2.9.0
       with:
         file: .github/workflows/build.Dockerfile
-        target: dotnet-test
-        tags: test-results:latest
-        load: true
-        
-    - name: Copy test results
-      run: |
-        id=$(docker create test-results)
-        docker cp $id:/work/testresults ${{ github.workspace }}/testresults
+        target: export-testresults
+        outputs: type=local,dest=${{ github.workspace }}
       
     - name: Upload dotnet test results
       uses: actions/upload-artifact@v3
