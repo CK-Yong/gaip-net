@@ -45,4 +45,4 @@ RUN dotnet pack ./src/Gaip.Net.Linq/Gaip.Net.Linq.csproj --no-build --output /ou
 
 # Build stage for exporting locally. Not used in build pipelines for now.
 FROM scratch AS export-packages
-COPY --from=dotnet-pack /output .
+COPY --from=dotnet-pack /output /nupkgs
