@@ -47,7 +47,7 @@ jobs:
     - name: Install GitVersion
       uses: gittools/actions/gitversion/setup@v0.9.13
       with:
-        versionSpec: '6.x'
+        versionSpec: '5.x'
     
     - name: Checkout for version calculation
       uses: actions/checkout@v2
@@ -59,7 +59,7 @@ jobs:
       uses: gittools/actions/gitversion/execute@v0.9.13
     
     - run: |
-        echo ${{ steps.gitversion.outputs.nuGetPreReleaseTagV2 }}
+        echo ${{ steps.gitversion.outputs.nuGetVersionV2 }}
     
     - uses: docker/build-push-action@v2.9.0
       id: package
