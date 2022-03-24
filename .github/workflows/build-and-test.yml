@@ -75,7 +75,7 @@ jobs:
         dotnet nuget push /output/*.nupkg -k ${{ secrets.NUGET_PAT }} -s https://api.nuget.org/v3/index.json
         
     - name: Upload nupkg files
-      if: steps.copy-nupkgs.outcome == 'success'
+      if: steps.package.outcome == 'success'
       uses: actions/upload-artifact@v3
       with:
         name: nuget-packages
