@@ -65,7 +65,7 @@ jobs:
         file: .github/workflows/build.Dockerfile
         target: export-packages
         build-args: Version=${{ steps.gitversion.outputs.nuGetVersionV2 }} 
-        output: type=local,dest=${{ github.workspace }}/nupkgs
+        outputs: type=local,dest=${{ github.workspace }}
     
     # Only push on actual builds, not on PRs
     - name: Push to Nuget
