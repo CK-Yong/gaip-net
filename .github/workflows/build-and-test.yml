@@ -58,11 +58,22 @@ jobs:
     
     - uses: docker/build-push-action@v2.9.0
       id: package
-      name: Prepare packages
+      name: Prepare pre-release packages
+      if: ${{ github.ref_name }} != 'main'
       with:
         file: .github/workflows/build.Dockerfile
         target: export-packages
-        build-args: Version=${{ steps.gitversion.outputs.nuGetVersionV2 }} 
+        build-args: Version=${{ steps.gitversion.outputs.SemVer }}${{ steps.gitversion.outputs.PreReleaseLabelWithDash }}.${{ github.run_number }}
+        outputs: type=local,dest=${{ github.workspace }}
+        
+    - uses: docker/build-push-action@v2.9.0
+      id: package
+      name: Prepare packages
+      if: ${{ github.ref_name }} == 'main'
+      with:
+        file: .github/workflows/build.Dockerfile
+        target: export-packages
+        build-args: Version=${{ steps.gitversion.outputs.SemVer }}
         outputs: type=local,dest=${{ github.workspace }}
 
     - name: Upload nupkg files
