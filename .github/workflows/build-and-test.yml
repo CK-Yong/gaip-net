@@ -64,21 +64,15 @@ jobs:
       with:
         file: .github/workflows/build.Dockerfile
         tags: gaip-net/packages:latest
-        target: dotnet-pack
+        target: export-packages
         build-args: Version=${{ steps.gitversion.outputs.nuGetVersionV2 }} 
-        load: true
+        output: ${{ github.workspace }}/nupkgs
     
     # Only push on actual builds, not on PRs
     - name: Push to Nuget
       if: steps.package.outcome == 'success' && github.event_name != 'pull_request'
       run : |
-        docker run --name pack gaip-net/packages:latest dotnet nuget push /output/*.nupkg -k ${{ secrets.NUGET_PAT }} -s https://api.nuget.org/v3/index.json
-        
-    - name: Copy nupkg files
-      id: copy-nupkgs
-      if: steps.package.outcome == 'success'
-      run : |
-        docker cp pack:/output ${{ github.workspace }}/nupkgs
+        dotnet nuget push /output/*.nupkg -k ${{ secrets.NUGET_PAT }} -s https://api.nuget.org/v3/index.json
         
     - name: Upload nupkg files
       if: steps.copy-nupkgs.outcome == 'success'
