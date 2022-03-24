@@ -2,9 +2,9 @@ name: build-and-test
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, prerelease ]
   pull_request:
-    branches: [ main ] 
+    branches: [ main, prerelease ] 
 
 jobs:
   build:
@@ -46,20 +46,20 @@ jobs:
     # Build and push packages           
     - name: Install GitVersion
       uses: gittools/actions/gitversion/setup@v0.9.13
+      if: github.event_name != 'pull_request'
       with:
         versionSpec: '5.x'
     
     - name: Checkout for version calculation
       uses: actions/checkout@v2
+      if: github.event_name != 'pull_request'
       with:
         fetch-depth: 0
         
     - name: Determine Version
       id:   gitversion
       uses: gittools/actions/gitversion/execute@v0.9.13
-    
-    - run: |
-        echo ${{ steps.gitversion.outputs.nuGetVersionV2 }}
+      if: github.event_name != 'pull_request'
     
     - uses: docker/build-push-action@v2.9.0
       id: package
