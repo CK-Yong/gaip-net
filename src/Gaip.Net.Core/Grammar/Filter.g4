@@ -110,8 +110,17 @@ restriction
 Comparable may either be a member or function.
 **/
 comparable
-    : function 
+    : illegal // Added for extra error checking
+    | function 
     | member
+    ;
+
+/**
+Matches things like foo.0.bar and foo[0].bar. See also https://google.aip.dev/160#has-operator
+**/
+illegal
+    : value (LBRACKET (field) RBRACKET)+ (DOT field)*
+    | value (DOT INTEGER)+ (DOT field)*
     ;
 
 /**    
@@ -252,6 +261,8 @@ INTEGER: DIGIT+;
 FLOAT: DIGIT+ ('.' DIGIT+)?;
 BOOLEAN: ('true' | 'false');
 DURATION: DIGIT+ ('.' DIGIT+)? 's';
+LBRACKET: '[';
+RBRACKET: ']';
 
 fragment T: ('T'|'t');
 fragment Z: ('Z'|'z');
