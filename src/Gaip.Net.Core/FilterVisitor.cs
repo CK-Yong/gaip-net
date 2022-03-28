@@ -74,6 +74,16 @@ namespace Gaip.Net.Core
             };
         }
 
+        public override object VisitComparable(FilterParser.ComparableContext context)
+        {
+            if (context.illegal() != null)
+            {
+                throw new ArgumentException($"Array accessors are not allowed.", context.illegal().GetText());
+            }
+            
+            return base.VisitComparable(context);
+        }
+
         private IFilterAdapter<T> EqualityOrSearch(object comparable, FilterParser.ArgContext arg)
         {
             var argValue = arg.comparable().member().value().STRING();
@@ -105,7 +115,7 @@ namespace Gaip.Net.Core
 
             return base.VisitMember(context);
         }
-
+        
         public override object VisitValue(FilterParser.ValueContext context)
         {
             if (context.INTEGER() != null)

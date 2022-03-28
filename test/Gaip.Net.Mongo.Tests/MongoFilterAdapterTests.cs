@@ -1,3 +1,4 @@
+using System;
 using FluentAssertions;
 using Gaip.Net.Core;
 using MongoDB.Bson;
@@ -152,5 +153,23 @@ public class MongoFilterVisitorTests
         // Assert
         var value = fieldDefinition.ConvertToBsonDocument();
         value.Should().BeEquivalentTo(BsonDocument.Parse(expectedQuery));
+    }
+
+    [TestCase("foo.0.bar=\"baz\"")]
+    [TestCase("foo[0].bar=\"baz\"")]
+    public void Should_reject_array_accessors(string text)
+    {
+        // Arrange
+        var filter = FilterBuilder
+            .FromString(text)
+            .UseAdapter(new MongoFilterAdapter<object>());
+
+        // Act
+        Action act = () => filter.Build();
+
+        // Assert
+        act.Should()
+            .Throw<ArgumentException>()
+            .WithMessage("Array accessors are not allowed. *");
     }
 }

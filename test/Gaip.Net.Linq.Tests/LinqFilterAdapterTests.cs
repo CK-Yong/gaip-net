@@ -315,6 +315,24 @@ public class Tests
         // Assert
         data.Where(filter).Select(x => x.Id).Should().BeEquivalentTo(expectedIds);
     }
+    
+    [TestCase("foo.0.bar=\"baz\"")]
+    [TestCase("foo[0].bar=\"baz\"")]
+    public void Should_reject_array_accessors(string text)
+    {
+        // Arrange
+        var filter = FilterBuilder
+            .FromString(text)
+            .UseAdapter(new LinqFilterAdapter<TestClass>());
+
+        // Act
+        Action act = () => filter.Build();
+
+        // Assert
+        act.Should()
+            .Throw<ArgumentException>()
+            .WithMessage("Array accessors are not allowed. *");
+    }
 }
 
 public class TestClass
