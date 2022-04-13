@@ -4,11 +4,11 @@ This project is an attempt to create a simple to use library that implements Goo
 # Packages
 Currently, the following packages are available:
 
-| Package        | Prerelease                                                                                                                              | 
-|----------------|-----------------------------------------------------------------------------------------------------------------------------------------|
-| Gaip.Net.Core  | [![NuGet Badge](https://buildstats.info/nuget/Gaip.Net.Core?includePreReleases=true)](https://www.nuget.org/packages/Gaip.Net.Core/)    |  
-| Gaip.Net.Mongo | [![NuGet Badge](https://buildstats.info/nuget/Gaip.Net.Mongo?includePreReleases=true)](https://www.nuget.org/packages/Gaip.Net.Mongo/)  |
-| Gaip.Net.Linq  | [![NuGet Badge](https://buildstats.info/nuget/Gaip.Net.Linq?includePreReleases=true)](https://www.nuget.org/packages/Gaip.Net.Linq/)    |
+| Package        | Prerelease                                                                                                                              | Stable                                                                                                            |
+|----------------|-----------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|
+| Gaip.Net.Core  | [![NuGet Badge](https://buildstats.info/nuget/Gaip.Net.Core?includePreReleases=true)](https://www.nuget.org/packages/Gaip.Net.Core/)    | [![NuGet Badge](https://buildstats.info/nuget/Gaip.Net.Core)](https://www.nuget.org/packages/Gaip.Net.Core/)      |
+| Gaip.Net.Mongo | [![NuGet Badge](https://buildstats.info/nuget/Gaip.Net.Mongo?includePreReleases=true)](https://www.nuget.org/packages/Gaip.Net.Mongo/)  | [![NuGet Badge](https://buildstats.info/nuget/Gaip.Net.Mongo)](https://www.nuget.org/packages/Gaip.Net.Mongo/)    |
+| Gaip.Net.Linq  | [![NuGet Badge](https://buildstats.info/nuget/Gaip.Net.Linq?includePreReleases=true)](https://www.nuget.org/packages/Gaip.Net.Linq/)    | [![NuGet Badge](https://buildstats.info/nuget/Gaip.Net.Linq)](https://www.nuget.org/packages/Gaip.Net.Linq/)      |
 
 # Usage
 This library is mainly built around performing queries in Mongo. For example:
@@ -67,6 +67,26 @@ var filter = FilterBuilder
     .Build();
     
 list.Where(filter).Select(x => x.Id).ToList(); // [1, 3]
+```
+
+# Blacklisting (or whitelisting)
+In order to prevent unsafe queries, you can use the blacklisting or whitelisting functionality, such as below:
+```csharp
+var filterResult = FilterBuilder.FromString("bar=\"baz\"")
+    .UseAdapter(new MongoFilterAdapter<MyClass>())
+    .UseWhitelist(x => x.Foo)
+    .Build();
+
+filterResult.IsQueryAllowed == false;
+myCollection.Find(filterResult.Value); // Throws InvalidOperationException
+
+var filterResult = FilterBuilder.FromString("foo=\"baz\"")
+    .UseAdapter(new MongoFilterAdapter<MyClass>())
+    .UseBlacklist(x => x.Foo)
+    .Build();
+    
+filterResult.IsQueryAllowed == false;
+myCollection.Find(filterResult.Value); // Throws InvalidOperationException
 ```
 
 # Extending functionality

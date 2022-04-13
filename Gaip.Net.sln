@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gaip.Net.Linq", "src\Gaip.N
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gaip.Net.Linq.Tests", "test\Gaip.Net.Linq.Tests\Gaip.Net.Linq.Tests.csproj", "{3C7FFBB9-9E6D-48DD-B631-E9DE883CC3D8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gaip.Net.Core.Tests", "test\Gaip.Net.Core.Tests\Gaip.Net.Core.Tests.csproj", "{0B29FE07-64CD-45EB-BD7A-88559F1A492E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +27,7 @@ Global
 		{33474BBF-B379-431E-811C-7A2E90FF91FE} = {110B44C1-9D1D-402B-8972-3F753F68AD29}
 		{2D36262B-4333-4744-88A5-5563FB84C830} = {110B44C1-9D1D-402B-8972-3F753F68AD29}
 		{3C7FFBB9-9E6D-48DD-B631-E9DE883CC3D8} = {3430BA8E-A4A2-4BEE-8759-4B0F67E237FA}
+		{0B29FE07-64CD-45EB-BD7A-88559F1A492E} = {3430BA8E-A4A2-4BEE-8759-4B0F67E237FA}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{D2CF7E37-F4A7-4D71-A0AE-B11DBFF5CF9E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -47,5 +50,9 @@ Global
 		{3C7FFBB9-9E6D-48DD-B631-E9DE883CC3D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3C7FFBB9-9E6D-48DD-B631-E9DE883CC3D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3C7FFBB9-9E6D-48DD-B631-E9DE883CC3D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B29FE07-64CD-45EB-BD7A-88559F1A492E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B29FE07-64CD-45EB-BD7A-88559F1A492E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B29FE07-64CD-45EB-BD7A-88559F1A492E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B29FE07-64CD-45EB-BD7A-88559F1A492E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
