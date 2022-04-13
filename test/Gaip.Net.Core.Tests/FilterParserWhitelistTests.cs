@@ -9,29 +9,33 @@ namespace Gaip.Net.Core.Tests;
 
 public class FilterParserWhitelistTests
 {
-    [SetUp]
-    public void Setup()
-    {
-    }
-
     [Test]
     public void Initializing_with_whitelist_should_deny_queries_to_non_whitelisted_properties()
     {
+        // Act
         var filterBuilder = FilterBuilder.FromString("bar=\"baz\"")
             .UseAdapter(new TestAdapter<MyClass>())
-            .UseWhitelist(x => x.Foo);
+            .UseWhitelist(x => x.Foo)
+            .Build();
 
-        filterBuilder.Whitelist.IsQueryAllowed.Should().BeFalse();        
+        // Assert
+        filterBuilder.IsQueryAllowed.Should().BeFalse();        
     }
     
     [Test]
-    public void Whitelist_should_allow_nested_properties()
+    public void Building_with_whitelist_should_deny_access_to_value()
     {
-        var filterBuilder = FilterBuilder.FromString("myNested.Baz=\"baz\"")
+        // Arrange
+        var filterBuilder = FilterBuilder.FromString("bar=\"baz\"")
             .UseAdapter(new TestAdapter<MyClass>())
-            .UseWhitelist(x => x.MyNested.Baz);
+            .UseWhitelist(x => x.Foo)
+            .Build();
 
-        filterBuilder.Whitelist.IsQueryAllowed.Should().BeTrue();        
+        // Act
+        var act = () => filterBuilder.Value;
+        
+        // Assert
+        act.Should().Throw<InvalidOperationException>().WithMessage("A non-whitelisted property was accessed in the input query");
     }
 
     [TestCase("Foo")]
@@ -40,20 +44,39 @@ public class FilterParserWhitelistTests
     [TestCase("fOo")]
     public void Whitelist_should_evaluate_with_case_insensitivity(string property)
     {
+        // Act
         var filterBuilder = FilterBuilder.FromString($"{property}=\"bar\"")
             .UseAdapter(new TestAdapter<MyClass>())
-            .UseWhitelist(x => x.Foo);
+            .UseWhitelist(x => x.Foo)
+            .Build();
 
-        filterBuilder.Whitelist.IsQueryAllowed.Should().BeTrue();   
+        // Assert
+        filterBuilder.IsQueryAllowed.Should().BeTrue();   
     }
-    
+
+    [Test]
+    public void Whitelist_should_allow_nested_properties()
+    {
+        // Act
+        var filterBuilder = FilterBuilder.FromString("myNested.Baz=\"baz\"")
+            .UseAdapter(new TestAdapter<MyClass>())
+            .UseWhitelist(x => x.MyNested.Baz)
+            .Build();
+
+        // Assert
+        filterBuilder.IsQueryAllowed.Should().BeTrue();        
+    }
+
     [Test]
     public void Initializing_whitelist_with_a_method_should_result_in_an_error()
     {
+        // Act
         Action act = () => FilterBuilder.FromString("bar=\"baz\"")
             .UseAdapter(new TestAdapter<MyClass>())
-            .UseWhitelist(x => x.ShouldNotBeCalled());
+            .UseWhitelist(x => x.ShouldNotBeCalled())
+            .Build();
 
+        // Assert
         act.Should()
             .Throw<ArgumentException>()
             .WithMessage("Expression x.ShouldNotBeCalled() must be a member expression");        

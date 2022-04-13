@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq.Expressions;
 using Antlr4.Runtime;
 using Gaip.Net.Core.Contracts;
@@ -39,26 +38,10 @@ namespace Gaip.Net.Core
             _filterContext = new FilterParser(tokenStream).filter();
             _visitor = new FilterVisitor<T>(adapter);
         }
-
-        private List<string> _whitelist = new();
-        public WhitelistResult<T> Whitelist = new();
-        public FilterBuilder<T> UseWhitelist(params Expression<Func<T, object>>[] whitelistedProperties)
+        
+        public WhitelistedFilterBuilder<T> UseWhitelist(params Expression<Func<T, object>>[] whitelistedProperties)
         {
-            foreach (var func in whitelistedProperties)
-            {
-                if (func.Body is MemberExpression propertyAccess)
-                {
-                    _whitelist.Add(propertyAccess.Member.Name);
-                }
-                else
-                {
-                    throw new ArgumentException($"Expression {func.Body} must be a member expression");
-                }
-            }
-            
-            // todo: Use Antlr listener to evaluate accessed properties, to see if they are all whitelisted.
-
-            return this;
+            return new WhitelistedFilterBuilder<T>(_filterContext, _visitor, whitelistedProperties);
         }
 
         public T Build()
@@ -72,10 +55,5 @@ namespace Gaip.Net.Core
 
             return adapter.GetResult();
         }
-    }
-
-    public class WhitelistResult<T>
-    {
-        public bool IsQueryAllowed { get; set; } = false;
     }
 }
