@@ -69,6 +69,26 @@ var filter = FilterBuilder
 list.Where(filter).Select(x => x.Id).ToList(); // [1, 3]
 ```
 
+# Blacklisting (or whitelisting)
+In order to prevent unsafe queries, you can use the blacklisting or whitelisting functionality, such as below:
+```csharp
+var filterResult = FilterBuilder.FromString("bar=\"baz\"")
+    .UseAdapter(new MongoFilterAdapter<MyClass>())
+    .UseWhitelist(x => x.Foo)
+    .Build();
+
+filterResult.IsQueryAllowed == false;
+myCollection.Find(filterResult.Value); // Throws InvalidOperationException
+
+var filterResult = FilterBuilder.FromString("foo=\"baz\"")
+    .UseAdapter(new MongoFilterAdapter<MyClass>())
+    .UseBlacklist(x => x.Foo)
+    .Build();
+    
+filterResult.IsQueryAllowed == false;
+myCollection.Find(filterResult.Value); // Throws InvalidOperationException
+```
+
 # Extending functionality
 At the moment, only queries that are compatible with the Mongo C# driver are supported. You are of course free to extend this library to support other databases. The easiest way to do this is to implement the `IFilterAdapter` interface. See also the [MongoFilterAdapter](./src/Gaip.Net.Mongo/MongoFilterAdapter.cs) class.
 

@@ -40,7 +40,6 @@ public class FilterBuilderWithBlacklist<T>
                 throw new ArgumentException($"Expression {func.Body} must be a member expression");
             }
         }
-
         
         IParseTreeListener blacklistListener = _isWhitelist ? new WhitelistListener(_blacklist) : new BlacklistListener(_blacklist);
         _filterParser.AddParseListener(blacklistListener);
