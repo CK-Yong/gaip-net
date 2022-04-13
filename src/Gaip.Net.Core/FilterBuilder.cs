@@ -38,11 +38,6 @@ namespace Gaip.Net.Core
             _filterContext = new FilterParser(tokenStream);
             _visitor = new FilterVisitor<T>(adapter);
         }
-        
-        public WhitelistedFilterBuilder<T> UseWhitelist(params Expression<Func<T, object>>[] whitelistedProperties)
-        {
-            return new WhitelistedFilterBuilder<T>(_filterContext, _visitor, whitelistedProperties);
-        }
 
         public T Build()
         {
@@ -54,6 +49,16 @@ namespace Gaip.Net.Core
             }
 
             return adapter.GetResult();
+        }
+
+        public FilterBuilderWithBlacklist<T> UseWhitelist(params Expression<Func<T, object>>[] whitelistedProperties)
+        {
+            return new FilterBuilderWithBlacklist<T>(_filterContext, _visitor, whitelistedProperties, isWhitelist: true);
+        }
+
+        public FilterBuilderWithBlacklist<T> UseBlacklist(params Expression<Func<T, object>>[] blacklistedProperties)
+        {
+            return new FilterBuilderWithBlacklist<T>(_filterContext, _visitor, blacklistedProperties);
         }
     }
 }
