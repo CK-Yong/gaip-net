@@ -27,7 +27,7 @@ namespace Gaip.Net.Core
 
     public class FilterBuilder<T>
     {
-        private readonly FilterParser.FilterContext _filterContext;
+        private readonly FilterParser _filterContext;
         private readonly FilterVisitor<T> _visitor;
 
         internal FilterBuilder(string text, IFilterAdapter<T> adapter)
@@ -35,7 +35,7 @@ namespace Gaip.Net.Core
             var inputStream = new AntlrInputStream(text);
             var lexer = new FilterLexer(inputStream);
             var tokenStream = new CommonTokenStream(lexer);
-            _filterContext = new FilterParser(tokenStream).filter();
+            _filterContext = new FilterParser(tokenStream);
             _visitor = new FilterVisitor<T>(adapter);
         }
         
@@ -46,7 +46,7 @@ namespace Gaip.Net.Core
 
         public T Build()
         {
-            var resultAdapter = _visitor.Visit(_filterContext);
+            var resultAdapter = _visitor.Visit(_filterContext.filter());
 
             if (resultAdapter is not IFilterAdapter<T> adapter)
             {
