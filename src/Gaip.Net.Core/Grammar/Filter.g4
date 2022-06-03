@@ -6,8 +6,8 @@ Filter, possibly empty
 filter
     : expression* EOF
     ;
-    
-/** 
+
+/**
 Expressions may either be a conjunction (AND) of sequences or a simple
 sequence.
 
@@ -21,7 +21,7 @@ expression
     : sequence (AND sequence)*
     ;
 
-/**    
+/**
 Sequence is composed of one or more whitespace (WS) separated factors.
 
 A sequence expresses a logical relationship between 'factors' where
@@ -52,7 +52,7 @@ factor
     : term (OR term)*
     ;
 
-/**    
+/**
 Terms may either be unary or simple expressions.
 
 Unary expressions negate the simple expression, either mathematically `-`
@@ -78,7 +78,7 @@ simple
     : restriction
     | composite
     ;
-    
+
 /**
 Restrictions express a relationship between a comparable value and a
 single argument. When the restriction only specifies a comparable
@@ -106,12 +106,12 @@ restriction
     : comparable (comparator arg)?
     ;
 
-/**    
+/**
 Comparable may either be a member or function.
 **/
 comparable
     : illegal // Added for extra error checking
-    | function 
+    | function
     | member
     ;
 
@@ -123,7 +123,7 @@ illegal
     | value (DOT INTEGER)+ (DOT field)*
     ;
 
-/**    
+/**
 Member expressions are either value or DOT qualified field references.
 
 Example: `expr.type_map.1.type`
@@ -163,7 +163,7 @@ comparator
     | EQUALS           // =
     | HAS              // :
     ;
-    
+
 /**
 Composite is a parenthesized expression, commonly used to group
 terms or clarify operator precedence.
@@ -191,7 +191,7 @@ value
     : INTEGER
     | FLOAT
     | BOOLEAN
-    | ASTERISK 
+    | ASTERISK
     | DURATION
     | DATETIME
     // Standard values.
@@ -267,7 +267,7 @@ RBRACKET: ']';
 fragment T: ('T'|'t');
 fragment Z: ('Z'|'z');
 fragment PLUSMINUS: ('+'|'-');
-DATETIME: QUOTE? DIGIT DIGIT DIGIT DIGIT '-' DIGIT DIGIT '-' DIGIT DIGIT T DIGIT DIGIT ':' DIGIT DIGIT ':' DIGIT DIGIT ('.' DIGIT+)? (Z | PLUSMINUS DIGIT DIGIT ':' DIGIT DIGIT)? QUOTE?;
+DATETIME: QUOTE DIGIT DIGIT DIGIT DIGIT '-' DIGIT DIGIT '-' DIGIT DIGIT T DIGIT DIGIT ':' DIGIT DIGIT ':' DIGIT DIGIT ('.' DIGIT+)? (Z | PLUSMINUS DIGIT DIGIT ':' DIGIT DIGIT)? QUOTE;
 
 QUOTE: ('\'' | '"');
 
