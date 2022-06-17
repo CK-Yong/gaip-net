@@ -172,4 +172,20 @@ public class MongoFilterVisitorTests
             .Throw<ArgumentException>()
             .WithMessage("Array accessors are not allowed. *");
     }
+
+    [TestCase("strings:foo", "{ strings: {$elemMatch: {$eq: \"foo\" }}}")]
+    public void Should_handle_has_operator(string text, string expectedQuery)
+    {
+        // Arrange
+        var filter = FilterBuilder
+            .FromString(text)
+            .UseAdapter(new MongoFilterAdapter<object>());
+
+        // Act
+        var fieldDefinition = filter.Build();
+
+        // Assert
+        var value = fieldDefinition.ConvertToBsonDocument();
+        value.Should().BeEquivalentTo(BsonDocument.Parse(expectedQuery));
+    }
 }
