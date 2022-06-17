@@ -173,8 +173,27 @@ public class MongoFilterVisitorTests
             .WithMessage("Array accessors are not allowed. *");
     }
 
-    [TestCase("strings:foo", "{ strings: {$elemMatch: {$eq: \"foo\" }}}")]
+    [TestCase("strings:\"foo\"", "{strings: {$elemMatch: {$eq: \"foo\" }}}")]
+    [TestCase("objects:foo", "{\"objects.foo\": { $exists: true }}")]
+    [TestCase("objects.foo:*", "{\"objects.foo\": { $exists: true }}")]
     public void Should_handle_has_operator(string text, string expectedQuery)
+    {
+        // Arrange
+        var filter = FilterBuilder
+            .FromString(text)
+            .UseAdapter(new MongoFilterAdapter<object>());
+
+        // Act
+        var fieldDefinition = filter.Build();
+
+        // Assert
+        var value = fieldDefinition.ConvertToBsonDocument();
+        value.Should().BeEquivalentTo(BsonDocument.Parse(expectedQuery));
+    }
+
+    [TestCase("strings.foo:\"bar\"", "{$or:[{strings: {$elemMatch: {foo: \"bar\" }}}, {\"strings.foo\":\"bar\"}]}")]
+    [TestCase("ints.foo:42", "{$or:[{ints: {$elemMatch: {foo: 42 }}}, {\"ints.foo\": 42}]}")]
+    public void Should_handle_has_operator_on_ambiguous_fields(string text, string expectedQuery)
     {
         // Arrange
         var filter = FilterBuilder
