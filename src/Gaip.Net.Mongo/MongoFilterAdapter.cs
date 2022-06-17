@@ -106,18 +106,59 @@ namespace Gaip.Net.Mongo
 
         public IFilterAdapter<FilterDefinition<TDocument>> Has(object comparable, object arg)
         {
-            FieldDefinition<TDocument, object> field = comparable.ToString();
+            if (arg is SoloWildCardValue)
+            {
+                FieldDefinition<TDocument, object> field = comparable.ToString();
+                return new MongoFilterAdapter<TDocument>(_filterBuilder.Exists(field));
+            }
 
+            if (comparable is string str && str.Contains('.'))
+            {
+                return new MongoFilterAdapter<TDocument>(HandleHasOperationOnNestedField(arg, str));
+            }
+
+            if (arg is TextValue accessor)
+            {
+                FieldDefinition<TDocument, object> field = comparable.ToString() + '.' + accessor;
+                return new MongoFilterAdapter<TDocument>(_filterBuilder.Exists(field));
+            }
+
+            // This is a direct access of some field.
+            var nonNested = HandleHasOperationOnField(comparable, arg);
+            return new MongoFilterAdapter<TDocument>(nonNested);
+        }
+
+        private FilterDefinition<TDocument> HandleHasOperationOnNestedField(object arg, string comparable)
+        {
+            // This is access of a nested field.
+            var comparables = comparable.Split('.');
+
+            FieldDefinition<TDocument, object> field = string.Join('.', comparables.Take(comparables.Length - 1));
+            FieldDefinition<object, object> target = comparables.Last();
             var argument = arg;
-
             if (arg is IValue argWithValue)
             {
                 argument = argWithValue.Value;
             }
 
-            return new MongoFilterAdapter<TDocument>(_filterBuilder.ElemMatch<object>(
-                field,
-                new BsonDocument("$eq", BsonValue.Create(argument))));
+            // Since we cannot be sure that the comparable is pointing to an array or object, we will assume both using an OR statement
+            var filter = _filterBuilder.ElemMatch(field, Builders<object>.Filter.Eq(target, argument));
+            filter |= _filterBuilder.Eq(comparable, argument);
+
+            return filter;
+        }
+
+        private FilterDefinition<TDocument> HandleHasOperationOnField(object comparable, object arg)
+        {
+            FieldDefinition<TDocument, object> field = comparable.ToString();
+
+            var argument = arg;
+            if (arg is IValue argWithValue)
+            {
+                argument = argWithValue.Value;
+            }
+
+            return _filterBuilder.ElemMatch<object>(field, new BsonDocument("$eq", BsonValue.Create(argument)));
         }
 
         public FilterDefinition<TDocument> GetResult()
