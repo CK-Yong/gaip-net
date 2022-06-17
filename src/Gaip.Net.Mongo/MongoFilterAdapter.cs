@@ -19,12 +19,12 @@ namespace Gaip.Net.Mongo
         public MongoFilterAdapter()
         {
         }
-        
+
         private MongoFilterAdapter(FilterDefinition<TDocument> filter)
         {
             _filter = filter;
         }
-        
+
         public IFilterAdapter<FilterDefinition<TDocument>> And(List<IFilterAdapter<FilterDefinition<TDocument>>> list)
         {
             var expressions = list
@@ -51,7 +51,7 @@ namespace Gaip.Net.Mongo
             {
                 val = stringLiteral.Value;
             }
-            
+
             FieldDefinition<TDocument, object> field = comparable.ToString();
             return new MongoFilterAdapter<TDocument>(_filterBuilder.Eq(field, val));
         }
@@ -63,7 +63,7 @@ namespace Gaip.Net.Mongo
             {
                 val = stringLiteral.Value;
             }
-            
+
             FieldDefinition<TDocument, object> field = comparable.ToString();
             return new MongoFilterAdapter<TDocument>(_filterBuilder.Ne(field, val));
         }
@@ -107,10 +107,20 @@ namespace Gaip.Net.Mongo
         public IFilterAdapter<FilterDefinition<TDocument>> Has(object comparable, object arg)
         {
             FieldDefinition<TDocument, object> field = comparable.ToString();
-            return new MongoFilterAdapter<TDocument>(_filterBuilder.ElemMatch<object>(field, $"{{$eq: {arg}}}"));
+
+            var argument = arg;
+
+            if (arg is IValue argWithValue)
+            {
+                argument = argWithValue.Value;
+            }
+
+            return new MongoFilterAdapter<TDocument>(_filterBuilder.ElemMatch<object>(
+                field,
+                new BsonDocument("$eq", BsonValue.Create(argument))));
         }
 
-        public FilterDefinition<TDocument> GetResult() 
+        public FilterDefinition<TDocument> GetResult()
         {
             return _filter;
         }

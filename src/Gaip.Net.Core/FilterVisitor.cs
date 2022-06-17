@@ -181,7 +181,7 @@ namespace Gaip.Net.Core
     /// <summary>
     /// Represents a value that is a string literal. This is used when the value was surrounded by quotes.
     /// </summary>
-    public sealed class StringLiteralValue
+    public sealed class StringLiteralValue : IValue
     {
         public StringLiteralValue(string value)
         {
@@ -199,7 +199,7 @@ namespace Gaip.Net.Core
     /// <summary>
     /// Represents a raw text value. This is used when the value was not surrounded by quotes.
     /// </summary>
-    public sealed class TextValue
+    public sealed class TextValue : IValue
     {
         internal TextValue(string value)
         {
@@ -212,5 +212,10 @@ namespace Gaip.Net.Core
         {
             return Value;
         }
+    }
+
+    public interface IValue
+    {
+        public string Value { get; }
     }
 }
