@@ -42,9 +42,9 @@ public class MongoFilterVisitorTests
     [TestCase("true", "{ foo : true }")]
     [TestCase("false", "{ foo : false }")]
     // Timestamps
-    [TestCase("2012-04-21T11:30:00-04:00", "{ foo : ISODate(\"2012-04-21T15:30:00\") }")]
-    [TestCase("2012-04-21T11:30:00Z", "{ foo : ISODate(\"2012-04-21T11:30:00\") }")]
-    [TestCase("2012-04-21T11:30:00", "{ foo : ISODate(\"2012-04-21T11:30:00\") }")]
+    [TestCase("\"2012-04-21T11:30:00-04:00\"", "{ foo : ISODate(\"2012-04-21T15:30:00\") }")]
+    [TestCase("\"2012-04-21T11:30:00Z\"", "{ foo : ISODate(\"2012-04-21T11:30:00\") }")]
+    [TestCase("\"2012-04-21T11:30:00\"", "{ foo : ISODate(\"2012-04-21T11:30:00\") }")]
     // Durations
     [TestCase("1s", "{ foo : 1000 }")] // Store as millis
     [TestCase("1.234s", "{ foo : 1234 }")] // Store as millis

@@ -80,7 +80,7 @@ namespace Gaip.Net.Core
             {
                 throw new ArgumentException($"Array accessors are not allowed.", context.illegal().GetText());
             }
-            
+
             return base.VisitComparable(context);
         }
 
@@ -115,7 +115,7 @@ namespace Gaip.Net.Core
 
             return base.VisitMember(context);
         }
-        
+
         public override object VisitValue(FilterParser.ValueContext context)
         {
             if (context.INTEGER() != null)
@@ -151,7 +151,7 @@ namespace Gaip.Net.Core
 
             if (context.DATETIME() != null)
             {
-                return DateTimeOffset.Parse(context.DATETIME().GetText(), CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal).UtcDateTime;
+                return DateTimeOffset.Parse(context.DATETIME().GetText().Trim('\"'), CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal).UtcDateTime;
             }
 
             if (context.STRING() != null)
@@ -179,7 +179,7 @@ namespace Gaip.Net.Core
     }
 
     /// <summary>
-    /// Represents a value that is a string literal. This is used when the value was surrounded by quotes. 
+    /// Represents a value that is a string literal. This is used when the value was surrounded by quotes.
     /// </summary>
     public sealed class StringLiteralValue
     {
@@ -189,7 +189,7 @@ namespace Gaip.Net.Core
         }
 
         public string Value { get; }
-        
+
         public override string ToString()
         {
             return Value;
@@ -197,7 +197,7 @@ namespace Gaip.Net.Core
     }
 
     /// <summary>
-    /// Represents a raw text value. This is used when the value was not surrounded by quotes. 
+    /// Represents a raw text value. This is used when the value was not surrounded by quotes.
     /// </summary>
     public sealed class TextValue
     {
@@ -207,7 +207,7 @@ namespace Gaip.Net.Core
         }
 
         public string Value { get; }
-        
+
         public override string ToString()
         {
             return Value;
